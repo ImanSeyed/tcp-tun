@@ -32,8 +32,6 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	header->dest_addr.byte_value =
 		convert_from_be32(buffer[start + 19], buffer[start + 18],
 				  buffer[start + 17], buffer[start + 16]);
-	uint8_t options[4] = { buffer[start + 20], buffer[start + 21],
-			       buffer[start + 22], buffer[start + 23] };
 
 	assert(header->ihl >= 5);
 	memset(header->options, 0, sizeof(header->options));
