@@ -14,22 +14,26 @@ void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	header->src_port = convert_from_be16(buffer[start], buffer[start + 1]);
 	header->dest_port =
 		convert_from_be16(buffer[start + 2], buffer[start + 3]);
+	header->seq_number =
+		convert_from_be32(buffer[start + 4], buffer[start + 5],
+				  buffer[start + 6], buffer[start + 7]);
 	header->ack_number =
-		convert_from_be16(buffer[start + 4], buffer[start + 5]);
-	header->data_offset = buffer[start + 6] >> 4 & 0xf;
+		convert_from_be32(buffer[start + 8], buffer[start + 9],
+				  buffer[start + 10], buffer[start + 11]);
+	header->data_offset = buffer[start + 12] >> 4 & 0xf;
 	header->reserved = 0;
-	header->is_urg = buffer[start + 7] >> 5 & 0x1;
-	header->is_ack = buffer[start + 7] >> 4 & 0x1;
-	header->is_psh = buffer[start + 7] >> 3 & 0x1;
-	header->is_rst = buffer[start + 7] >> 2 & 0x1;
-	header->is_syn = buffer[start + 7] >> 1 & 0x1;
-	header->is_fin = buffer[start + 7] & 0x1;
+	header->is_urg = buffer[start + 13] >> 5 & 0x1;
+	header->is_ack = buffer[start + 13] >> 4 & 0x1;
+	header->is_psh = buffer[start + 13] >> 3 & 0x1;
+	header->is_rst = buffer[start + 13] >> 2 & 0x1;
+	header->is_syn = buffer[start + 13] >> 1 & 0x1;
+	header->is_fin = buffer[start + 13] & 0x1;
 	header->win_size =
-		convert_from_be16(buffer[start + 8], buffer[start + 9]);
+		convert_from_be16(buffer[start + 14], buffer[start + 15]);
 	header->checksum =
-		convert_from_be16(buffer[start + 10], buffer[start + 11]);
+		convert_from_be16(buffer[start + 16], buffer[start + 17]);
 	header->urg_pointer =
-		convert_from_be16(buffer[start + 12], buffer[start + 13]);
+		convert_from_be16(buffer[start + 18], buffer[start + 19]);
 
 	assert(header->data_offset >= 5);
 	memset(header->options, 0, sizeof(header->options));
@@ -38,7 +42,7 @@ void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	} else {
 		header->options_len = (header->data_offset * 4) -
 				      (TCP_MINIMUM_DATA_OFFSET * 4);
-		uint8_t *p = &buffer[start + 14];
+		uint8_t *p = &buffer[start + 20];
 		for (int i = 0; i < header->options_len; ++p, ++i)
 			header->options[i] = *p;
 	}
