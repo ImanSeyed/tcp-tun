@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <sys/types.h>
 #include "types.h"
 #include "endian.h"
@@ -29,11 +30,18 @@ void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 		convert_from_be16(buffer[start + 10], buffer[start + 11]);
 	header->urg_pointer =
 		convert_from_be16(buffer[start + 12], buffer[start + 13]);
-	uint8_t options[4] = { buffer[start + 14], buffer[start + 15],
-			       buffer[start + 16], buffer[start + 17] };
-	uint32_t tmp32;
-	memcpy(&tmp32, options, sizeof(uint32_t));
-	header->options = tmp32 >> 2 & 0x00ffffff;
+
+	assert(header->data_offset >= 5);
+	memset(header->options, 0, sizeof(header->options));
+	if (header->data_offset == 5) {
+		header->options_len = 0;
+	} else {
+		header->options_len = (header->data_offset * 4) -
+				      (TCP_MINIMUM_DATA_OFFSET * 4);
+		uint8_t *p = &buffer[start + 14];
+		for (int i = 0; i < header->options_len; ++p, ++i)
+			header->options[i] = *p;
+	}
 }
 
 void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
@@ -53,6 +61,7 @@ void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
 	header->win_size = win_size;
 	header->checksum = 0;
 	header->urg_pointer = 0;
-	header->options = 0;
+	header->options_len = 0;
+	memset(header->options, 0, sizeof(header->options));
 }
 

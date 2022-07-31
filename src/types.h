@@ -1,8 +1,9 @@
 #ifndef __TCP_TUN_TYPES_H__
 #define __TCP_TUN_TYPES_H__
-
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 union ipv4_addr {
 	struct {
 		uint8_t first : 8;
@@ -29,7 +30,8 @@ struct tcp_header {
 	uint16_t win_size;
 	uint16_t checksum;
 	uint16_t urg_pointer;
-	uint32_t options : 24;
+	uint8_t options[40];
+	size_t options_len;
 };
 
 struct ipv4_header {
@@ -45,7 +47,8 @@ struct ipv4_header {
 	uint16_t checksum;
 	union ipv4_addr src_addr;
 	union ipv4_addr dest_addr;
-	uint32_t options : 24;
+	uint8_t options[40];
+	size_t options_len;
 };
 
 enum tcp_state {

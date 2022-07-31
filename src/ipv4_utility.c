@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 #include "types.h"
 #include "endian.h"
 
@@ -33,9 +34,18 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 				  buffer[start + 17], buffer[start + 16]);
 	uint8_t options[4] = { buffer[start + 20], buffer[start + 21],
 			       buffer[start + 22], buffer[start + 23] };
-	uint32_t tmp32;
-	memcpy(&tmp32, options, sizeof(uint32_t));
-	header->options = tmp32 >> 2 & 0x00ffffff;
+
+	assert(header->ihl >= 5);
+	memset(header->options, 0, sizeof(header->options));
+	if (header->ihl == 5) {
+		header->options_len = 0;
+	} else {
+		header->options_len =
+			(header->ihl * 4) - (IHL_MINIMUM_SIZE * 4);
+		uint8_t *p = &buffer[start + 20];
+		for (int i = 0; i < header->options_len; ++p, ++i)
+			header->options[i] = *p;
+	}
 }
 
 void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
@@ -54,5 +64,6 @@ void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
 	header->checksum = 0;
 	header->src_addr = src_addr;
 	header->dest_addr = dest_addr;
-	header->options = 0;
+	header->options_len = 0;
+	memset(header->options, 0, sizeof(header->options));
 }
