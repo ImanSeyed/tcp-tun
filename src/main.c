@@ -8,8 +8,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include "ipv4_funcs.h"
-#include "tcp_funcs.h"
+#include "ipv4_utility.h"
+#include "tcp_utility.h"
 #include "types.h"
 #include "endian.h"
 #include "print.h"

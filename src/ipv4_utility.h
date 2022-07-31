@@ -1,5 +1,5 @@
-#ifndef __TCP_TUN_IPV4_FUNCS_H__
-#define __TCP_TUN_IPV4_FUNCS_H__
+#ifndef __TCP_TUN_IPV4_UTILITY_H__
+#define __TCP_TUN_IPV4_UTILITY_H__
 #include <sys/types.h>
 #include <stdint.h>
 #include "types.h"

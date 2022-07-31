@@ -1,5 +1,5 @@
-#ifndef __TCP_TUN_TCP_FUNCS_H__
-#define __TCP_TUN_TCP_FUNCS_H__
+#ifndef __TCP_TUN_TCP_UTILITY_H__
+#define __TCP_TUN_TCP_UTILITY_H__
 #include <stdint.h>
 #include <sys/types.h>
 #include "types.h"
