@@ -1,10 +1,12 @@
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/types.h>
 #include "types.h"
 #include "endian.h"
 
 #define PADDING 8
+#define TCP_MINIMUM_DATA_OFFSET 5
 
 void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 {
@@ -34,9 +36,23 @@ void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	header->options = tmp32 >> 2 & 0x00ffffff;
 }
 
-void fill_tcp_header(struct tcp_header *header, union ipv4_addr src,
-		     union ipv4_addr dest, uint32_t seq_number,
-		     uint16_t win_size)
+void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
+		     uint16_t dest_port, uint32_t seq_number, uint16_t win_size)
 {
+	header->src_port = src_port;
+	header->dest_port = dest_port;
+	header->seq_number = seq_number;
+	header->ack_number = 0;
+	header->data_offset = TCP_MINIMUM_DATA_OFFSET;
+	header->is_urg = false;
+	header->is_ack = false;
+	header->is_psh = false;
+	header->is_rst = false;
+	header->is_syn = false;
+	header->is_fin = false;
+	header->win_size = win_size;
+	header->checksum = 0;
+	header->urg_pointer = 0;
+	header->options = 0;
 }
 
