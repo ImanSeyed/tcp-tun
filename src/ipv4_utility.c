@@ -4,6 +4,8 @@
 #include "types.h"
 #include "endian.h"
 
+#define IHL_MINIMUM_SIZE 5
+
 void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 		       size_t start)
 {
@@ -36,3 +38,21 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	header->options = tmp32 >> 2 & 0x00ffffff;
 }
 
+void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
+		      uint8_t time_to_live, uint8_t protocol,
+		      union ipv4_addr src_addr, union ipv4_addr dest_addr)
+{
+	header->version = 0x4;
+	header->ihl = IHL_MINIMUM_SIZE;
+	header->type_of_service = 0;
+	header->total_length = total_length;
+	header->identification = 0;
+	header->flags = 0x4; /* Don't fragment */
+	header->fragment_offset = 0;
+	header->time_to_live = time_to_live;
+	header->protocol = protocol;
+	header->checksum = 0;
+	header->src_addr = src_addr;
+	header->dest_addr = dest_addr;
+	header->options = 0;
+}
