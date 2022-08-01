@@ -21,12 +21,12 @@ struct tcp_header {
 	uint32_t ack_number;
 	uint8_t data_offset : 4;
 	uint8_t reserved : 6;
-	bool is_urg : 1;
-	bool is_ack : 1;
-	bool is_psh : 1;
-	bool is_rst : 1;
-	bool is_syn : 1;
-	bool is_fin : 1;
+	bool is_urg;
+	bool is_ack;
+	bool is_psh;
+	bool is_rst;
+	bool is_syn;
+	bool is_fin;
 	uint16_t win_size;
 	uint16_t checksum;
 	uint16_t urg_pointer;
