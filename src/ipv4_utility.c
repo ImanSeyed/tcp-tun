@@ -65,3 +65,27 @@ void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
 	header->options_len = 0;
 	memset(header->options, 0, sizeof(header->options));
 }
+
+size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer)
+{
+	buffer[0] = header->version << 4 | header->ihl;
+	buffer[1] = header->type_of_service;
+	convert_into_be16(header->total_length, &buffer[2], &buffer[3]);
+	convert_into_be16(header->identification, &buffer[4], &buffer[5]);
+	uint16_t tmp = header->flags;
+	tmp = tmp << 13 | header->fragment_offset;
+	convert_into_be16(tmp, &buffer[6], &buffer[7]);
+	buffer[8] = header->time_to_live;
+	buffer[9] = header->protocol;
+	convert_into_be16(header->checksum, &buffer[10], &buffer[11]);
+	convert_into_be32(header->src_addr.byte_value, &buffer[12], &buffer[13],
+			  &buffer[14], &buffer[15]);
+	convert_into_be32(header->dest_addr.byte_value, &buffer[16],
+			  &buffer[17], &buffer[18], &buffer[19]);
+
+	size_t written_bytes = header->options_len + 20;
+	for (int i = 20, j = 0; i < written_bytes; ++i, ++j)
+		buffer[i] = header->options[j];
+
+	return written_bytes;
+}
