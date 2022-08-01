@@ -1,13 +1,12 @@
 #include <linux/if_tun.h>
 #include <sys/ioctl.h>
 #include <linux/if.h>
-#include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include "ipv4_utility.h"
 #include "tcp_utility.h"
 #include "types.h"

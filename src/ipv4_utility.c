@@ -84,7 +84,7 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer)
 			  &buffer[17], &buffer[18], &buffer[19]);
 
 	size_t written_bytes = header->options_len + 20;
-	for (int i = 20, j = 0; i < written_bytes; ++i, ++j)
+	for (size_t i = 20, j = 0; i < written_bytes; ++i, ++j)
 		buffer[i] = header->options[j];
 
 	return written_bytes;

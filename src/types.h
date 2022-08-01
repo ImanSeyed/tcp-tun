@@ -1,8 +1,8 @@
 #ifndef __TCP_TUN_TYPES_H__
 #define __TCP_TUN_TYPES_H__
 #include <sys/types.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 union ipv4_addr {
 	struct {

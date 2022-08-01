@@ -1,8 +1,8 @@
+#include <sys/types.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdbool.h>
 #include <assert.h>
-#include <sys/types.h>
 #include "types.h"
 #include "endian.h"
 
@@ -87,7 +87,7 @@ size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer)
 	convert_into_be16(header->urg_pointer, &buffer[18], &buffer[19]);
 
 	size_t written_bytes = header->options_len + 20;
-	for (int i = 20, j = 0; i < written_bytes; ++i, ++j)
+	for (size_t i = 20, j = 0; i < written_bytes; ++i, ++j)
 		buffer[i] = header->options[j];
 
 	return written_bytes;

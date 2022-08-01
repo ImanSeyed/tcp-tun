@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "types.h"
 
 void print_addr(union ipv4_addr ip, uint16_t port)
