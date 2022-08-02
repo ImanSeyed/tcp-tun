@@ -43,7 +43,6 @@ int main()
 {
 	int nic, nbytes;
 	uint8_t buffer[1504];
-	uint16_t eth_flags;
 	uint16_t eth_type;
 	struct ipv4_header input_ipv4_header;
 	struct tcp_header input_tcp_header;
@@ -51,7 +50,7 @@ int main()
 	nic = tun_open("tun0");
 	for (;;) {
 		nbytes = read(nic, buffer, sizeof(buffer));
-		eth_flags = convert_from_be16(buffer[0], buffer[1]);
+		/* skipping ethernet flags */
 		eth_type = convert_from_be16(buffer[2], buffer[3]);
 
 		/* Ignore everything except IPv4 packets */

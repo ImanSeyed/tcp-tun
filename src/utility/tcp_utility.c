@@ -78,9 +78,9 @@ size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer)
 	convert_into_be32(header->ack_number, &buffer[8], &buffer[9],
 			  &buffer[10], &buffer[11]);
 	uint16_t tmp = header->data_offset;
-	tmp = tmp << 12 | (header->is_urg << 5) | (header->is_ack << 4) |
+	tmp = (tmp << 12 | (header->is_urg << 5) | (header->is_ack << 4) |
 	      (header->is_psh << 3) | (header->is_rst << 2) |
-	      (header->is_syn << 1) | header->is_fin & 0xf03f;
+	      (header->is_syn << 1) | header->is_fin) & 0xf03f;
 	convert_into_be16(tmp, &buffer[12], &buffer[13]);
 	convert_into_be16(header->win_size, &buffer[14], &buffer[15]);
 	convert_into_be16(header->checksum, &buffer[16], &buffer[17]);
