@@ -43,7 +43,7 @@ void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 		header->options_len = (header->data_offset * 4) -
 				      (TCP_MINIMUM_DATA_OFFSET * 4);
 		uint8_t *p = &buffer[start + 20];
-		for (int i = 0; i < header->options_len; ++p, ++i)
+		for (size_t i = 0; i < header->options_len; ++p, ++i)
 			header->options[i] = *p;
 	}
 }

@@ -1,7 +1,6 @@
 CC := gcc
 CFLAGS := -Wall -Wextra
-override CFLAGS :=
-SOURCES := $(wildcard src/*.c)
+SOURCES := $(wildcard src/*.c src/*/*.c)
 
 all:
 	$(CC) $(SOURCES) $(CFLAGS) -o tcp-tun

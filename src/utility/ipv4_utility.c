@@ -42,7 +42,7 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 		header->options_len =
 			(header->ihl * 4) - (IHL_MINIMUM_SIZE * 4);
 		uint8_t *p = &buffer[start + 20];
-		for (int i = 0; i < header->options_len; ++p, ++i)
+		for (size_t i = 0; i < header->options_len; ++p, ++i)
 			header->options[i] = *p;
 	}
 }
