@@ -1,6 +1,6 @@
 ## Description
 
-This repository is a learning experience in implementing TCP in C language. In order not to get bothered by the Linux kernel TCP implementation, it's over a `tun` interface.
+This repository is a learning experience in implementing TCP with C language. In order not to get bothered by the Linux kernel TCP implementation, it's over a `tun` interface.
 
 ## How To Run It
 
@@ -20,7 +20,7 @@ $ nc 192.168.1.20 123
 
 ## Warning
 
-Don't mess with routing stuff if you don't know what you're doing, otherwise your connection to the Internet can get lost. This program is under development and it's not a complete TCP implementation, therefor just test it on a `tun` device without changing your route table.
+Don't mess with routing stuff if you don't know what you're doing, otherwise your connection to the Internet can get lost. This program is under development and it's not a complete TCP implementation, therefor just test it on a `tun` device without changing your routing table.
 
 ## References
 
