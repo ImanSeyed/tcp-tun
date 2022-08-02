@@ -22,7 +22,7 @@ $ nc 192.168.1.20 123
 
 Don't mess with routing stuff if you don't know what you're doing, otherwise your connection to the Internet can get lost. This program is under development and it's not a complete TCP implementation, therefor just test it on a `tun` device without changing your routing table.
 
-## References
+## Standards
 
 - [RFC 791](https://datatracker.ietf.org/doc/html/rfc791) (IPv4)
 - [RFC 793](https://datatracker.ietf.org/doc/html/rfc793) (TCP)
