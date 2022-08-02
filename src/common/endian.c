@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <string.h>
+#include "endian.h"
 
 uint16_t convert_from_be16(uint8_t first, uint8_t second)
 {
@@ -37,7 +38,7 @@ void convert_into_be16(uint16_t data, uint8_t *first, uint8_t *second)
 	*second = tmp >> 8;
 }
 
-void convert_into_be32(uint16_t data, uint8_t *first, uint8_t *second,
+void convert_into_be32(uint32_t data, uint8_t *first, uint8_t *second,
 		       uint8_t *third, uint8_t *fourth)
 {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__

@@ -7,11 +7,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include "ipv4_utility.h"
-#include "tcp_utility.h"
-#include "types.h"
-#include "endian.h"
-#include "print.h"
+#include "utility/ipv4_utility.h"
+#include "utility/tcp_utility.h"
+#include "common/types.h"
+#include "common/endian.h"
+#include "common/print.h"
 
 /* 
  * 2 bytes for ether_flags, 2 bytes for ether_type
