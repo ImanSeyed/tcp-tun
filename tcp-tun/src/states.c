@@ -3,10 +3,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "utility/tcp_utility.h"
-#include "utility/ipv4_utility.h"
-#include "common/types.h"
-#include "states.h"
+#include "../include/utils/tcp_utility.h"
+#include "../include/utils/ipv4_utility.h"
+#include "../include/common/types.h"
+#include "../include/states.h"
 
 #define TCP_PROTO 0x06
 
@@ -21,8 +21,7 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		perror("write on tun");
 }
 
-void accept(int nic_fd, enum tcp_state state, struct ipv4_header *ipv4h,
-	    struct tcp_header *tcph)
+void accept(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph)
 {
 	struct TCB starter = { .state = SynRecvd,
 			       .send = { .iss = 0,
@@ -37,10 +36,9 @@ void accept(int nic_fd, enum tcp_state state, struct ipv4_header *ipv4h,
 					 .wnd = tcph->win_size,
 					 .up = false } };
 
-	if (!tcph->is_syn) {
-		/* only expected SYN packet */
+	/* only expected SYN packet */
+	if (!tcph->is_syn)
 		return;
-	}
 
 	/* start establishing a connection */
 	struct tcp_header *syn_ack;
@@ -59,7 +57,6 @@ void accept(int nic_fd, enum tcp_state state, struct ipv4_header *ipv4h,
 	send_packet(nic_fd, ip, syn_ack, buffer);
 }
 
-void on_packet(int nic_fd, enum tcp_state state, struct ipv4_header *ipv4h,
-	       struct tcp_header *tcph)
+void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph)
 {
 }

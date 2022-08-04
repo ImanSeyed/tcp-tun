@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "types.h"
-#include "print.h"
+#include "../../include/common/types.h"
+#include "../../include/common/print.h"
 
 void print_addr(union ipv4_addr ip, uint16_t port)
 {

@@ -27,7 +27,7 @@ struct send_sequence_space {
 	uint32_t iss; /* initial send sequence number */
 };
 
-/* Receive Sequence Space (RFC 793 53.2 Figure 5)
+/*  Receive Sequence Space (RFC 793 53.2 Figure 5)
  *
  *            1          2          3
  *        ----------|----------|----------
@@ -52,10 +52,8 @@ struct TCB {
 	struct recv_sequence_space recv;
 };
 
-void accept(int nic_fd, enum tcp_state state, struct ipv4_header *ipv4h,
-	    struct tcp_header *tcph);
-void on_packet(int nic_fd, enum tcp_state state, struct ipv4_header *ipv4h,
-	       struct tcp_header *tcph);
+void accept(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph);
+void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph);
 void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 uint8_t *buffer);
 

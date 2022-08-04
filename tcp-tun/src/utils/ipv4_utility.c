@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include "../common/types.h"
-#include "../common/endian.h"
-#include "ipv4_utility.h"
+#include "../../include/common/types.h"
+#include "../../include/common/endian.h"
+#include "../../include/utils/ipv4_utility.h"
 
 #define IHL_MINIMUM_SIZE 5
 

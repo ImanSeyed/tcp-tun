@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-#include "endian.h"
+#include "../../include/endian.h"
 
 uint16_t convert_from_be16(uint8_t first, uint8_t second)
 {
