@@ -33,16 +33,16 @@ uint32_t hash_func(struct connection_quad *quad)
 }
 
 struct connection *connections_pair(struct connection_quad *key,
-				    enum tcp_state *value)
+				    enum tcp_state value)
 {
 	struct connection *entry = malloc(sizeof(struct connection));
 	entry->quad = *key;
-	entry->state = *value;
+	entry->state = value;
 	entry->next = NULL;
 	return entry;
 }
 
-struct connections_hashmap *connectionscreate(void)
+struct connections_hashmap *connections_create(void)
 {
 	struct connections_hashmap *hashmap =
 		malloc(sizeof(struct connections_hashmap));
@@ -55,7 +55,7 @@ struct connections_hashmap *connectionscreate(void)
 }
 
 void connections_set(struct connections_hashmap *hashmap,
-		     struct connection_quad *key, enum tcp_state *value)
+		     struct connection_quad *key, enum tcp_state value)
 {
 	uint32_t slot = hash_func(key);
 	struct connection *entry = hashmap->entries[slot];
@@ -70,7 +70,7 @@ void connections_set(struct connections_hashmap *hashmap,
 	while (entry != NULL) {
 		if (memcmp(&entry->quad, key, sizeof(struct connection_quad)) ==
 		    0) {
-			entry->state = *value;
+			entry->state = value;
 			return;
 		}
 		prev = entry;

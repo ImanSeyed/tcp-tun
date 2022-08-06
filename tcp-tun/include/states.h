@@ -52,7 +52,7 @@ struct TCB {
 	struct recv_sequence_space recv;
 };
 
-void accept(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph);
+void accept_request(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph);
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph);
 void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 uint8_t *buffer);

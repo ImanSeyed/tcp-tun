@@ -9,15 +9,21 @@
 #include <stdio.h>
 #include "../include/utils/ipv4_utility.h"
 #include "../include/utils/tcp_utility.h"
-#include "../include/common/types.h"
 #include "../include/common/endian.h"
+#include "../include/common/types.h"
 #include "../include/common/print.h"
+#include "../include/connections.h"
+#include "../include/states.h"
 
 /* 
  * 2 bytes for ether_flags, 2 bytes for ether_type
  * according to tuntap.txt in Linux kernel documentations 
  * */
 #define RAW_OFFSET 4
+
+void handle_term(int sig)
+{
+}
 
 int tun_open(char *devname)
 {
@@ -46,8 +52,11 @@ int main()
 	uint16_t eth_type;
 	struct ipv4_header input_ipv4_header;
 	struct tcp_header input_tcp_header;
-
+	struct connections_hashmap *connections_ht;
+	enum tcp_state state;
 	nic = tun_open("tun0");
+	connections_ht = connections_create();
+
 	for (;;) {
 		nbytes = read(nic, buffer, sizeof(buffer));
 		/* skipping ethernet flags */
@@ -66,12 +75,20 @@ int main()
 		parse_tcp_header(&input_tcp_header, buffer,
 				 RAW_OFFSET + (input_ipv4_header.ihl * 4));
 
-		print_addr(input_ipv4_header.src_addr,
-			   input_tcp_header.src_port);
-		printf(" -> ");
-		print_addr(input_ipv4_header.dest_addr,
-			   input_tcp_header.dest_port);
-		printf("\n");
-		print_bytes(buffer, RAW_OFFSET, nbytes);
+		struct connection_quad new_quad;
+		new_quad.src.ip = input_ipv4_header.src_addr;
+		new_quad.dest.ip = input_ipv4_header.dest_addr;
+		new_quad.src.port = input_tcp_header.src_port;
+		new_quad.dest.port = input_tcp_header.dest_port;
+		state = Listen; /* just a random default state for all network */
+		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
+			on_packet(nic, &input_ipv4_header, &input_tcp_header);
+		} else {
+			accept_request(nic, &input_ipv4_header,
+				       &input_tcp_header);
+			connections_set(connections_ht, &new_quad, state);
+		}
+		connections_dump(connections_ht);
+		printf("==============================\n");
 	}
 }
