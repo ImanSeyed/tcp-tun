@@ -1,9 +1,10 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "../include/connections.h"
 #include "../include/common/print.h"
+#include "../include/connections.h"
 
 #define TABLE_SIZE 20000
 
@@ -31,8 +32,8 @@ uint32_t hash_func(struct connection_quad *quad)
 	return pair_hash(pair_hash(f0, f1), f2) % TABLE_SIZE;
 }
 
-struct connection *connections_hashmap_pair(struct connection_quad *key,
-					    enum tcp_state *value)
+struct connection *connections_pair(struct connection_quad *key,
+				    enum tcp_state *value)
 {
 	struct connection *entry = malloc(sizeof(struct connection));
 	entry->quad = *key;
@@ -41,7 +42,7 @@ struct connection *connections_hashmap_pair(struct connection_quad *key,
 	return entry;
 }
 
-struct connections_hashmap *connections_hashmap_create(void)
+struct connections_hashmap *connectionscreate(void)
 {
 	struct connections_hashmap *hashmap =
 		malloc(sizeof(struct connections_hashmap));
@@ -53,45 +54,47 @@ struct connections_hashmap *connections_hashmap_create(void)
 	return hashmap;
 }
 
-void connections_hashmap_set(struct connections_hashmap *hashmap,
-			     struct connection_quad *key, enum tcp_state *value)
+void connections_set(struct connections_hashmap *hashmap,
+		     struct connection_quad *key, enum tcp_state *value)
 {
 	uint32_t slot = hash_func(key);
 	struct connection *entry = hashmap->entries[slot];
 
 	if (entry == NULL) {
-		hashmap->entries[slot] = connections_hashmap_pair(key, value);
+		hashmap->entries[slot] = connections_pair(key, value);
 		return;
 	}
 
 	struct connection *prev;
 
 	while (entry != NULL) {
-		if (memcmp(&entry->quad, key, sizeof(struct connection_quad))) {
+		if (memcmp(&entry->quad, key, sizeof(struct connection_quad)) ==
+		    0) {
 			entry->state = *value;
 			return;
 		}
 		prev = entry;
 		entry = prev->next;
 	}
-	prev->next = connections_hashmap_pair(key, value);
+	prev->next = connections_pair(key, value);
 }
 
-enum tcp_state *connections_hashmap_get(struct connections_hashmap *hashmap,
-					struct connection_quad *key)
+enum tcp_state *connections_get(struct connections_hashmap *hashmap,
+				struct connection_quad *key)
 {
 	uint32_t slot = hash_func(key);
 	struct connection *entry = hashmap->entries[slot];
 	while (entry != NULL) {
-		if (memcmp(&entry->quad, key, sizeof(struct connection_quad)))
+		if (memcmp(&entry->quad, key, sizeof(struct connection_quad)) ==
+		    0)
 			return &entry->state;
 		entry = entry->next;
 	}
 	return NULL;
 }
 
-void connections_hashmap_del(struct connections_hashmap *hashmap,
-			     struct connection_quad *key)
+void connections_del(struct connections_hashmap *hashmap,
+		     struct connection_quad *key)
 {
 	uint32_t bucket = hash_func(key);
 	struct connection *entry = hashmap->entries[bucket];
@@ -103,7 +106,8 @@ void connections_hashmap_del(struct connections_hashmap *hashmap,
 	int index = 0;
 
 	while (entry != NULL) {
-		if (memcmp(&entry->quad, key, sizeof(struct connection_quad))) {
+		if (memcmp(&entry->quad, key, sizeof(struct connection_quad)) ==
+		    0) {
 			/* first item and no next entry */
 			if (entry->next == NULL && index == 0)
 				hashmap->entries[bucket] = NULL;
@@ -130,7 +134,7 @@ void connections_hashmap_del(struct connections_hashmap *hashmap,
 	}
 }
 
-void connections_hashmap_dump(struct connections_hashmap *hashmap)
+void connections_dump(struct connections_hashmap *hashmap)
 {
 	for (int i = 0; i < TABLE_SIZE; ++i) {
 		struct connection *entry = hashmap->entries[i];
@@ -150,4 +154,22 @@ void connections_hashmap_dump(struct connections_hashmap *hashmap)
 		}
 		printf("\n");
 	}
+}
+
+bool connections_entry_is_occupied(struct connections_hashmap *hashmap,
+				   struct connection_quad *key)
+{
+	for (int i = 0; i < TABLE_SIZE; ++i) {
+		struct connection *entry = hashmap->entries[i];
+		if (entry == NULL)
+			continue;
+		while (entry->next != NULL) {
+			if (memcmp(&entry->quad, key,
+				   sizeof(struct connection_quad)) == 0) {
+				return true;
+			}
+			entry = entry->next;
+		}
+	}
+	return false;
 }
