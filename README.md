@@ -10,7 +10,7 @@ You just need to run `run.sh` with bash:
 $ bash run.sh
 ```
 
-Don't worry about `sudo` stuff. It's for setting some capabilities over `tcp-tun` file and assigning IP address for `tun` interface. Of course, you can just do the process manually. (Just read the `run.sh` script)
+Don't worry about `sudo` stuff. It's for setting some capabilities over `tcp-tun` file and assigning IP address for `tun` interface. Of course, you can do the process manually. (Just read the `run.sh` script)
 
 You can use `nc` to make a connection with the program.
 
@@ -20,7 +20,7 @@ $ nc 192.168.20.10 123
 
 ## Warning
 
-Don't mess with routing stuff if you don't know what you're doing, otherwise your connection to the Internet can get lost. This program is under development and it's not a complete TCP implementation, therefor just test it on a `tun` device without changing your routing table.
+Don't mess with routing stuff if you don't know what you're doing, otherwise your connection to the Internet may get lost. This program is under development and it's not a complete TCP implementation, therefore just test it on a `tun` device without changing your routing table.
 
 ## Standards
 
