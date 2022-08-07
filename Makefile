@@ -1,8 +1,8 @@
 CC := gcc
 CFLAGS := -Wall -Wextra
-SOURCES := $(wildcard tcp-tun/src/*.c tcp-tun/src/*/*.c)
+SOURCES := $(wildcard src/*.c src/*/*.c)
 
 all:
-	$(CC) $(SOURCES) $(CFLAGS) -o tcp-tun.out
+	$(CC) $(SOURCES) $(CFLAGS) -o tcp-tun
 clean:
-	rm -rf tcp-tun.out
+	rm -rf tcp-tun
