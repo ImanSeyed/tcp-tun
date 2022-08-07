@@ -21,10 +21,6 @@
  * */
 #define RAW_OFFSET 4
 
-void handle_term(int sig)
-{
-}
-
 int tun_open(char *devname)
 {
 	struct ifreq ifr;
