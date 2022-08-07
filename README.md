@@ -15,7 +15,7 @@ Don't worry about `sudo` stuff. It's for setting some capabilities over `tcp-tun
 You can use `nc` to make a connection with the program.
 
 ```bash
-$ nc 192.168.1.20 123
+$ nc 192.168.20.10 123
 ```
 
 ## Warning
