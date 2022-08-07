@@ -6,21 +6,24 @@
 #include <stdio.h>
 #include "../include/utils/tcp_utility.h"
 #include "../include/utils/ipv4_utility.h"
+#include "../include/common/endian.h"
 #include "../include/common/types.h"
 #include "../include/states.h"
 
+#define RAW_OFFSET 4
 #define TCP_PROTO 0x06
 
 void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 uint8_t *buffer)
 {
 	memset(buffer, 0, 1500);
+	convert_into_be16(0x08, &buffer[2], &buffer[3]);
 	size_t ipv4h_len = (ipv4h->ihl * 4) + ipv4h->options_len;
 	size_t buffer_len = 0;
-	buffer_len += dump_ipv4_header(ipv4h, buffer);
+	buffer_len += dump_ipv4_header(ipv4h, buffer, RAW_OFFSET);
 	buffer_len += dump_tcp_header(tcph, buffer, ipv4h_len);
-	if (write(nic_fd, buffer, buffer_len) == -1)
-		perror("write on tun");
+	if (write(nic_fd, buffer, buffer_len + RAW_OFFSET) == -1)
+		perror("write over tun");
 }
 
 void accept_request(int nic_fd, struct ipv4_header *ipv4h,

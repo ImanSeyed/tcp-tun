@@ -67,26 +67,32 @@ void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
 	memset(header->options, 0, sizeof(header->options));
 }
 
-size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer)
+size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
+			size_t start)
 {
-	buffer[0] = header->version << 4 | header->ihl;
-	buffer[1] = header->type_of_service;
-	convert_into_be16(header->total_length, &buffer[2], &buffer[3]);
-	convert_into_be16(header->identification, &buffer[4], &buffer[5]);
+	buffer[start + 0] = header->version << 4 | header->ihl;
+	buffer[start + 1] = header->type_of_service;
+	convert_into_be16(header->total_length, &buffer[start + 2],
+			  &buffer[start + 3]);
+	convert_into_be16(header->identification, &buffer[start + 4],
+			  &buffer[start + 5]);
 	uint16_t tmp = header->flags;
 	tmp = tmp << 13 | header->fragment_offset;
-	convert_into_be16(tmp, &buffer[6], &buffer[7]);
-	buffer[8] = header->time_to_live;
-	buffer[9] = header->protocol;
-	convert_into_be16(header->checksum, &buffer[10], &buffer[11]);
-	convert_into_be32(header->src_addr.byte_value, &buffer[15], &buffer[14],
-			  &buffer[13], &buffer[12]);
-	convert_into_be32(header->dest_addr.byte_value, &buffer[19],
-			  &buffer[18], &buffer[17], &buffer[16]);
+	convert_into_be16(tmp, &buffer[start + 6], &buffer[start + 7]);
+	buffer[start + 8] = header->time_to_live;
+	buffer[start + 9] = header->protocol;
+	convert_into_be16(header->checksum, &buffer[start + 10],
+			  &buffer[start + 11]);
+	convert_into_be32(header->src_addr.byte_value, &buffer[start + 15],
+			  &buffer[start + 14], &buffer[start + 13],
+			  &buffer[start + 12]);
+	convert_into_be32(header->dest_addr.byte_value, &buffer[start + 19],
+			  &buffer[start + 18], &buffer[start + 17],
+			  &buffer[start + 16]);
 
 	size_t written_bytes = header->options_len + 20;
 	for (size_t i = 20, j = 0; i < written_bytes; ++i, ++j)
-		buffer[i] = header->options[j];
+		buffer[start + i] = header->options[j];
 
 	return written_bytes;
 }
