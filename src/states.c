@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "../include/utils/tcp_utility.h"
@@ -13,6 +14,7 @@
 void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 uint8_t *buffer)
 {
+	memset(buffer, 0, 1500);
 	size_t ipv4h_len = (ipv4h->ihl * 4) + ipv4h->options_len;
 	size_t buffer_len = 0;
 	buffer_len += dump_ipv4_header(ipv4h, buffer);

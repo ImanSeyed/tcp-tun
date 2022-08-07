@@ -79,10 +79,10 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer)
 	buffer[8] = header->time_to_live;
 	buffer[9] = header->protocol;
 	convert_into_be16(header->checksum, &buffer[10], &buffer[11]);
-	convert_into_be32(header->src_addr.byte_value, &buffer[12], &buffer[13],
-			  &buffer[14], &buffer[15]);
-	convert_into_be32(header->dest_addr.byte_value, &buffer[16],
-			  &buffer[17], &buffer[18], &buffer[19]);
+	convert_into_be32(header->src_addr.byte_value, &buffer[15], &buffer[14],
+			  &buffer[13], &buffer[12]);
+	convert_into_be32(header->dest_addr.byte_value, &buffer[19],
+			  &buffer[18], &buffer[17], &buffer[16]);
 
 	size_t written_bytes = header->options_len + 20;
 	for (size_t i = 20, j = 0; i < written_bytes; ++i, ++j)
