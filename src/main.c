@@ -7,13 +7,13 @@
 #include <string.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include "../include/utils/ipv4_utility.h"
-#include "../include/utils/tcp_utility.h"
-#include "../include/common/endian.h"
-#include "../include/common/types.h"
-#include "../include/common/print.h"
-#include "../include/connections.h"
-#include "../include/states.h"
+#include "utils/ipv4_utility.h"
+#include "utils/tcp_utility.h"
+#include "common/endian.h"
+#include "common/types.h"
+#include "common/print.h"
+#include "connections.h"
+#include "states.h"
 
 /* 
  * 2 bytes for ether_flags, 2 bytes for ether_type

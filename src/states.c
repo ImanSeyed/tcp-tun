@@ -4,11 +4,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "../include/utils/tcp_utility.h"
-#include "../include/utils/ipv4_utility.h"
-#include "../include/common/endian.h"
-#include "../include/common/types.h"
-#include "../include/states.h"
+#include "utils/tcp_utility.h"
+#include "utils/ipv4_utility.h"
+#include "common/endian.h"
+#include "common/types.h"
+#include "states.h"
 
 #define RAW_OFFSET 4
 #define TCP_PROTO 0x06
