@@ -52,10 +52,10 @@ struct ipv4_header {
 };
 
 enum tcp_state {
-	Closed,
-	Listen,
-	SynRecvd,
-	Estab,
+	CLOSED,
+	LISTEN,
+	SYNRECVD,
+	ESTAB,
 };
 
 struct addrress_pair {

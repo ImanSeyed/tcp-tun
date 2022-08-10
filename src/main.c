@@ -76,7 +76,7 @@ int main()
 		new_quad.dest.ip = input_ipv4_header.dest_addr;
 		new_quad.src.port = input_tcp_header.src_port;
 		new_quad.dest.port = input_tcp_header.dest_port;
-		state = Listen; /* just a random default state for all network */
+		state = LISTEN; /* just a random default state for all network */
 		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
 			on_packet(nic, &input_ipv4_header, &input_tcp_header);
 		} else {
