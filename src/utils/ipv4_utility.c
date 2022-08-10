@@ -97,7 +97,7 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	return written_bytes;
 }
 
-uint16_t ipv4_checksum(void *addr, int count)
+uint16_t checksum(void *addr, int count)
 {
 	uint32_t sum = 0;
 	uint16_t *ptr = addr;

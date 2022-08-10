@@ -18,12 +18,13 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 {
 	memset(buffer, 0, 1500);
 	convert_into_be16(0x08, &buffer[2], &buffer[3]);
-	size_t ipv4h_len = (ipv4h->ihl * 4) + ipv4h->options_len;
-	size_t buffer_len = 0;
-	buffer_len += dump_ipv4_header(ipv4h, buffer, RAW_OFFSET);
-	buffer_len += dump_tcp_header(tcph, buffer, ipv4h_len + RAW_OFFSET);
-	ipv4h->checksum = ipv4_checksum(buffer + RAW_OFFSET, ipv4h_len / 2);
-	if (write(nic_fd, buffer, buffer_len + RAW_OFFSET) == -1)
+	size_t ipv4h_len = 0, tcph_len = 0, buffer_len = 0;
+	ipv4h_len += dump_ipv4_header(ipv4h, buffer, RAW_OFFSET);
+	tcph_len += dump_tcp_header(tcph, buffer, ipv4h_len + RAW_OFFSET);
+	buffer_len = RAW_OFFSET + ipv4h_len + tcph_len;
+	ipv4h->checksum = checksum(buffer + RAW_OFFSET, ipv4h_len / 2);
+	tcph->checksum = checksum(buffer + RAW_OFFSET + ipv4h_len, tcph_len / 2);
+	if (write(nic_fd, buffer, buffer_len) == -1)
 		perror("write over tun");
 }
 
