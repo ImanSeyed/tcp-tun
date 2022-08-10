@@ -2,3 +2,4 @@ tcp-tun
 .clang-format
 .idea/
 build/
+cmake-build-debug/
