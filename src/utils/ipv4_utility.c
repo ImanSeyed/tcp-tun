@@ -56,7 +56,7 @@ void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
 	header->type_of_service = 0;
 	header->total_length = total_length;
 	header->identification = 0;
-	header->flags = 0x4; /* Don't fragment */
+	header->flags = 0x2; /* Don't fragment */
 	header->fragment_offset = 0;
 	header->time_to_live = time_to_live;
 	header->protocol = protocol;

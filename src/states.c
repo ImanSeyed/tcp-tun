@@ -31,6 +31,10 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 void accept_request(int nic_fd, struct ipv4_header *ipv4h,
 		    struct tcp_header *tcph)
 {
+	/* only expected SYN packet */
+	if (!tcph->is_syn)
+		return;
+
 	struct TCB starter = { .state = SYNRECVD,
 			       .send = { .iss = 0,
 					 .una = 0,
@@ -43,10 +47,6 @@ void accept_request(int nic_fd, struct ipv4_header *ipv4h,
 					 .nxt = tcph->seq_number + 1,
 					 .wnd = tcph->win_size,
 					 .up = false } };
-
-	/* only expected SYN packet */
-	if (!tcph->is_syn)
-		return;
 
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
