@@ -23,7 +23,12 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	tcph_len += dump_tcp_header(tcph, buffer, ipv4h_len + RAW_OFFSET);
 	buffer_len = RAW_OFFSET + ipv4h_len + tcph_len;
 	ipv4h->checksum = checksum(buffer + RAW_OFFSET, ipv4h_len / 2);
-	tcph->checksum = checksum(buffer + RAW_OFFSET + ipv4h_len, tcph_len / 2);
+	tcph->checksum =
+		checksum(buffer + RAW_OFFSET + ipv4h_len, tcph_len / 2);
+	convert_into_be16(ipv4h->checksum, &buffer[RAW_OFFSET + 10],
+			   &buffer[RAW_OFFSET + 11]);
+	convert_into_be16(tcph->checksum, &buffer[RAW_OFFSET + ipv4h_len + 16],
+			  &buffer[RAW_OFFSET + ipv4h_len + 17]);
 	if (write(nic_fd, buffer, buffer_len) == -1)
 		perror("write over tun");
 }
@@ -35,18 +40,20 @@ void accept_request(int nic_fd, struct ipv4_header *ipv4h,
 	if (!tcph->is_syn)
 		return;
 
-	struct TCB starter = { .state = SYNRECVD,
-			       .send = { .iss = 0,
-					 .una = 0,
-					 .nxt = 1,
-					 .wnd = 10,
-					 .up = false,
-					 .wl1 = 0,
-					 .wl2 = 0 },
-			       .recv = { .irs = tcph->seq_number,
-					 .nxt = tcph->seq_number + 1,
-					 .wnd = tcph->win_size,
-					 .up = false } };
+	struct TCB starter = {
+		.state = SYNRECVD,
+		.send = { .iss = 0,
+			  .una = 0,
+			  .nxt = 1,
+			  .wnd = 10,
+			  .up = false,
+			  .wl1 = 0,
+			  .wl2 = 0 },
+		.recv = { .irs = tcph->seq_number,
+			  .nxt = tcph->seq_number + 1,
+			  .wnd = tcph->win_size,
+			  .up = false },
+	};
 
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
