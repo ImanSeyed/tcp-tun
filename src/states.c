@@ -67,7 +67,7 @@ void accept_request(int nic_fd, struct ipv4_header *ipv4h,
 
 	syn_ack.is_syn = true;
 	syn_ack.is_ack = true;
-	fill_ipv4_header(&ip, (syn_ack.data_offset * 4) + syn_ack.options_len,
+	fill_ipv4_header(&ip, 20 + (syn_ack.data_offset * 4) + syn_ack.options_len,
 			 64, TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &ip, &syn_ack, buffer);
 }
