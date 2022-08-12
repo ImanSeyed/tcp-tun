@@ -24,12 +24,6 @@ void print_bytes(uint8_t *bytes, size_t start, size_t end)
 void print_state(enum tcp_state state)
 {
 	switch (state) {
-	case CLOSED:
-		printf("ClOSED");
-		break;
-	case LISTEN:
-		printf("LISTEN");
-		break;
 	case SYNRECVD:
 		printf("SYN_RECIVED");
 		break;

@@ -52,8 +52,6 @@ struct ipv4_header {
 };
 
 enum tcp_state {
-	CLOSED,
-	LISTEN,
 	SYNRECVD,
 	ESTAB,
 };

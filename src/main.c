@@ -11,7 +11,6 @@
 #include "utils/tcp_utility.h"
 #include "common/endian.h"
 #include "common/types.h"
-#include "common/print.h"
 #include "connections.h"
 #include "states.h"
 
@@ -49,7 +48,7 @@ int main()
 	struct ipv4_header input_ipv4_header;
 	struct tcp_header input_tcp_header;
 	struct connections_hashmap *connections_ht;
-	enum tcp_state state;
+	struct TCB starter;
 	nic = tun_open("tun0");
 	connections_ht = connections_create();
 
@@ -76,13 +75,13 @@ int main()
 		new_quad.dest.ip = input_ipv4_header.dest_addr;
 		new_quad.src.port = input_tcp_header.src_port;
 		new_quad.dest.port = input_tcp_header.dest_port;
-		state = LISTEN; /* just a random default state for all network */
+
 		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
-			on_packet(nic, &input_ipv4_header, &input_tcp_header);
+			on_packet(nic, &input_ipv4_header, &input_tcp_header, &starter);
 		} else {
-			accept_request(nic, &input_ipv4_header,
+			starter = accept_request(nic, &input_ipv4_header,
 				       &input_tcp_header);
-			connections_set(connections_ht, &new_quad, state);
+			connections_set(connections_ht, &new_quad, starter.state);
 		}
 		connections_dump(connections_ht);
 		printf("==============================\n");

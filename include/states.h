@@ -52,9 +52,12 @@ struct TCB {
 	struct recv_sequence_space recv;
 };
 
-void accept_request(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph);
-void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph);
+struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
+			  struct tcp_header *tcph);
+void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
+	       struct TCB *starter);
 void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 uint8_t *buffer);
+bool is_between_wrapped(uint32_t start, uint32_t x, uint32_t end);
 
 #endif

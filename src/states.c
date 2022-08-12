@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include "utils/tcp_utility.h"
 #include "utils/ipv4_utility.h"
@@ -26,20 +25,30 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	tcph->checksum =
 		checksum(buffer + RAW_OFFSET + ipv4h_len, tcph_len / 2);
 	convert_into_be16(ipv4h->checksum, &buffer[RAW_OFFSET + 10],
-			   &buffer[RAW_OFFSET + 11]);
+			  &buffer[RAW_OFFSET + 11]);
 	convert_into_be16(tcph->checksum, &buffer[RAW_OFFSET + ipv4h_len + 16],
 			  &buffer[RAW_OFFSET + ipv4h_len + 17]);
 	if (write(nic_fd, buffer, buffer_len) == -1)
 		perror("write over tun");
 }
 
-void accept_request(int nic_fd, struct ipv4_header *ipv4h,
-		    struct tcp_header *tcph)
+bool is_between_wrapped(uint32_t start, uint32_t x, uint32_t end)
 {
-	/* only expected SYN packet */
-	if (!tcph->is_syn)
-		return;
+	if (start == x) {
+		return false;
+	} else if (start < x) {
+		if (end >= start && end <= x)
+			return false;
+	} else if (start > x) {
+		if (!(end < start && end > x))
+			return false;
+	}
+	return true;
+}
 
+struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
+			  struct tcp_header *tcph)
+{
 	struct TCB starter = {
 		.state = SYNRECVD,
 		.send = { .iss = 0,
@@ -67,11 +76,66 @@ void accept_request(int nic_fd, struct ipv4_header *ipv4h,
 
 	syn_ack.is_syn = true;
 	syn_ack.is_ack = true;
-	fill_ipv4_header(&ip, 20 + (syn_ack.data_offset * 4) + syn_ack.options_len,
+	fill_ipv4_header(&ip,
+			 20 + (syn_ack.data_offset * 4) + syn_ack.options_len,
 			 64, TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &ip, &syn_ack, buffer);
+
+	return starter;
 }
 
-void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph)
+void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
+	       struct TCB *starter)
 {
+	uint32_t seg_len = tcph->data_offset * 4;
+	if (tcph->is_fin)
+		++seg_len;
+	if (tcph->is_syn)
+		++seg_len;
+	/* first, check that sequence numbers are valid (RFC 793 3.3) */
+	/* acceptable ACK check (SND.UNA < SEG.ACK =< SND.NXT) */
+	if (!is_between_wrapped(starter->send.una, tcph->ack_number,
+				starter->send.nxt + 1))
+		return;
+
+	/* zero-length segment has separate rules for acceptance */
+	if (seg_len == 0) {
+		if (starter->recv.wnd == 0) {
+			if (tcph->seq_number != starter->recv.nxt)
+				return;
+		} else {
+			if (!is_between_wrapped(
+				    starter->recv.nxt - 1, tcph->seq_number,
+				    starter->recv.nxt + starter->recv.wnd))
+				return;
+		}
+	} else {
+		if (starter->recv.wnd == 0)
+			return;
+		/* valid segment check:
+		 * RCV.NXT =< SEG.SEQ < RCV.NXT + RCV.WND) ||
+		 * RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND
+		 * */
+		else if (!is_between_wrapped(
+				 starter->recv.nxt - 1, tcph->seq_number,
+				 starter->recv.nxt + starter->recv.wnd) &&
+			 !is_between_wrapped(starter->recv.nxt - 1,
+					     tcph->seq_number + seg_len - 1,
+					     starter->recv.nxt +
+						     starter->recv.wnd))
+			return;
+	}
+
+	switch (starter->state) {
+	case SYNRECVD:
+		/* expect to get an ACK for our SYN-ACK */
+		if (!tcph->is_ack)
+			return;
+		starter->state = ESTAB;
+		/* now let's terminate the connection */
+
+		break;
+	case ESTAB:
+		break;
+	}
 }
