@@ -20,14 +20,8 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	size_t ipv4h_len = 0, tcph_len = 0, buffer_len = 0;
 	ipv4h_len += dump_ipv4_header(ipv4h, buffer, RAW_OFFSET);
 	tcph_len += dump_tcp_header(tcph, buffer, ipv4h_len + RAW_OFFSET);
+	/* apparently kernel does calculate checksum for us, no need to do that here */
 	buffer_len = RAW_OFFSET + ipv4h_len + tcph_len;
-	ipv4h->checksum = checksum(buffer + RAW_OFFSET, ipv4h_len / 2);
-	tcph->checksum =
-		checksum(buffer + RAW_OFFSET + ipv4h_len, tcph_len / 2);
-	convert_into_be16(ipv4h->checksum, &buffer[RAW_OFFSET + 10],
-			  &buffer[RAW_OFFSET + 11]);
-	convert_into_be16(tcph->checksum, &buffer[RAW_OFFSET + ipv4h_len + 16],
-			  &buffer[RAW_OFFSET + ipv4h_len + 17]);
 	if (write(nic_fd, buffer, buffer_len) == -1)
 		perror("write over tun");
 }
@@ -44,6 +38,32 @@ bool is_between_wrapped(uint32_t start, uint32_t x, uint32_t end)
 			return false;
 	}
 	return true;
+}
+
+bool is_synchronized(struct TCB *starter)
+{
+	if (starter->state == SYNRECVD)
+		return true;
+	else if (starter->state == ESTAB)
+		return false;
+}
+
+void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
+	      struct TCB *starter)
+{
+	uint8_t buffer[1504];
+	struct ipv4_header rst_ipv4h;
+	struct tcp_header rst_tcph;
+	/* write out the headers */
+	/* TODO: fix sequence numbers */
+	fill_tcp_header(&rst_tcph, tcph->dest_port, tcph->src_port, 0,
+			starter->send.wnd);
+	rst_tcph.ack_number = 0;
+	rst_tcph.is_rst = true;
+	fill_ipv4_header(&rst_ipv4h,
+			 20 + (rst_tcph.data_offset * 4) + rst_tcph.options_len,
+			 64, TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
+	send_packet(nic_fd, &rst_ipv4h, &rst_tcph, buffer);
 }
 
 struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
@@ -67,7 +87,7 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
 	struct ipv4_header ip;
-	uint8_t buffer[1500];
+	uint8_t buffer[1504];
 
 	/* write out the headers */
 	fill_tcp_header(&syn_ack, tcph->dest_port, tcph->src_port,
@@ -94,6 +114,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		++seg_len;
 	/* first, check that sequence numbers are valid (RFC 793 3.3) */
 	/* acceptable ACK check (SND.UNA < SEG.ACK =< SND.NXT) */
+	/* TODO: handle synchronized RST */
 	if (!is_between_wrapped(starter->send.una, tcph->ack_number,
 				starter->send.nxt + 1))
 		return;
