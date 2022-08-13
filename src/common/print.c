@@ -30,6 +30,15 @@ void print_state(enum tcp_state state)
 	case ESTAB:
 		printf("ESTAB");
 		break;
+	case FINWAIT1:
+		printf("FIN_WAIT1");
+		break;
+	case FINWAIT2:
+		printf("FIN_WAIT1");
+		break;
+	case CLOSING:
+		printf("CLOSING");
+		break;
 	}
 }
 

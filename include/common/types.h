@@ -54,6 +54,9 @@ struct ipv4_header {
 enum tcp_state {
 	SYNRECVD,
 	ESTAB,
+	FINWAIT1,
+	FINWAIT2,
+	CLOSING,
 };
 
 struct addrress_pair {

@@ -43,9 +43,9 @@ bool is_between_wrapped(uint32_t start, uint32_t x, uint32_t end)
 bool is_synchronized(struct TCB *starter)
 {
 	if (starter->state == SYNRECVD)
-		return true;
-	else if (starter->state == ESTAB)
 		return false;
+	else
+		return true;
 }
 
 void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
@@ -64,6 +64,23 @@ void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 			 20 + (rst_tcph.data_offset * 4) + rst_tcph.options_len,
 			 64, TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &rst_ipv4h, &rst_tcph, buffer);
+}
+
+void send_fin(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
+	      struct TCB *starter)
+{
+	uint8_t buffer[1504];
+	struct ipv4_header fin_ipv4h;
+	struct tcp_header fin_tcph;
+	/* write out the headers */
+	fill_tcp_header(&fin_tcph, tcph->dest_port, tcph->src_port,
+			starter->send.nxt, starter->send.wnd);
+	fin_tcph.ack_number = 0;
+	fin_tcph.is_fin = true;
+	fill_ipv4_header(&fin_ipv4h,
+			 20 + (fin_tcph.data_offset * 4) + fin_tcph.options_len,
+			 64, TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
+	send_packet(nic_fd, &fin_ipv4h, &fin_tcph, buffer);
 }
 
 struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
@@ -152,11 +169,34 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		/* expect to get an ACK for our SYN-ACK */
 		if (!tcph->is_ack)
 			return;
+		/* must have ACKed our SYN, since we detected at least one ACKed
+		 * byte, and we have only sent one byte (the SYN)
+		 * */
 		starter->state = ESTAB;
 		/* now let's terminate the connection */
-
+		/* TODO: needs to be stored in the retransmission queue */
+		send_fin(nic_fd, ipv4h, tcph, starter);
+		starter->state = FINWAIT1;
 		break;
 	case ESTAB:
+		/* UNIMPLEMENTED */
+	case FINWAIT1:
+		if (!tcph->is_fin) {
+			/* UNIMPLEMENTED */
+		}
+		/* must send ACKed our FIN, since we detected at least one ACKed
+		 * byte, and we have only sent one byte (the FIN)
+		 * */
+		starter->state = FINWAIT2;
+		break;
+	case CLOSING:
+		if (!tcph->is_fin) {
+			/* unimplemented */
+		}
+		/* must send ACKed our FIN, since we detected at least one ACKed
+		 * byte, and we have only sent one byte (the FIN)
+		 * */
+		starter->state = CLOSING;
 		break;
 	}
 }
