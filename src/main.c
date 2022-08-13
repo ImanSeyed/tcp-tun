@@ -14,12 +14,6 @@
 #include "connections.h"
 #include "states.h"
 
-/* 
- * 2 bytes for ether_flags, 2 bytes for ether_type
- * according to tuntap.txt in Linux kernel documentations 
- * */
-#define RAW_OFFSET 4
-
 int tun_open(char *devname)
 {
 	struct ifreq ifr;
@@ -64,7 +58,7 @@ int main()
 		parse_ipv4_header(&input_ipv4_header, buffer, RAW_OFFSET);
 
 		/* Ignore everything except TCP packets */
-		if (input_ipv4_header.protocol != 0x06)
+		if (input_ipv4_header.protocol != TCP_PROTO)
 			continue;
 
 		parse_tcp_header(&input_tcp_header, buffer,

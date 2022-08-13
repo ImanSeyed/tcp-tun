@@ -56,11 +56,7 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 			  struct tcp_header *tcph);
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	       struct TCB *starter);
-void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-		 uint8_t *buffer);
 bool is_between_wrapped(uint32_t start, uint32_t x, uint32_t end);
 bool is_synchronized(struct TCB *starter);
-void send_rst(int nic_fd, struct ipv4_header *ipv4, struct tcp_header *tcph,
-	      struct TCB *starter);
 
 #endif
