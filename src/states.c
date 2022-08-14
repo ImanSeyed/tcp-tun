@@ -38,8 +38,8 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 	struct TCB starter = {
 		.state = SYNRECVD,
 		.send = { .iss = 0,
-			  .una = 0,
-			  .nxt = 1,
+			  .una = starter.send.iss,
+			  .nxt = starter.send.iss,
 			  .wnd = 10,
 			  .up = false,
 			  .wl1 = 0,
@@ -83,7 +83,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	/* TODO: handle synchronized RST */
 	if (!is_between_wrapped(starter->send.una, tcph->ack_number,
 				starter->send.nxt + 1)) {
-		if(!is_synchronized(starter)) {
+		if (!is_synchronized(starter)) {
 			/* according to the Reset Generation, we should send RST */
 			send_rst(nic_fd, ipv4h, tcph, starter);
 		}
@@ -148,7 +148,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 * */
 		starter->state = FINWAIT2;
 		break;
-	case CLOSING:
+	case FINWAIT2:
 		if (!tcph->is_fin) {
 			/* unimplemented */
 		}
