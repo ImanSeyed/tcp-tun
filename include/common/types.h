@@ -12,6 +12,7 @@
 
 #define IPv4_PROTO 0x08
 #define TCP_PROTO 0x06
+#define PSEUDO_HEADER_SIZE 12
 
 union ipv4_addr {
 	struct {

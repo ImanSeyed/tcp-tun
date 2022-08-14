@@ -1,6 +1,8 @@
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "common/types.h"
 #include "common/endian.h"
@@ -112,4 +114,23 @@ uint16_t checksum(void *addr, int count)
 		sum = (sum & 0xffff) + (sum >> 16);
 
 	return ~sum;
+}
+
+uint8_t *get_pseudo_header(struct ipv4_header *header)
+{
+	uint8_t *buffer = (uint8_t *)malloc(PSEUDO_HEADER_SIZE);
+	memset(buffer, 0, PSEUDO_HEADER_SIZE);
+	convert_into_be32(header->src_addr.byte_value, &buffer[0], &buffer[1],
+			  &buffer[2], &buffer[3]);
+	convert_into_be32(header->dest_addr.byte_value, &buffer[4], &buffer[5],
+			  &buffer[6], &buffer[7]);
+	buffer[9] = header->protocol;
+	uint16_t segment_len = header->total_length - (header->ihl * 4);
+	convert_into_be16(segment_len, &buffer[10], &buffer[11]);
+	return buffer;
+}
+
+uint16_t ipv4_checksum(uint8_t *pseudo_header)
+{
+	return checksum(pseudo_header, PSEUDO_HEADER_SIZE / 2);
 }

@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "utils/ipv4_utility.h"
 #include "utils/tcp_utility.h"
@@ -12,20 +13,28 @@
 void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 uint8_t *buffer)
 {
+	uint8_t *pseudo_header = NULL;
 	memset(buffer, 0, 1500);
 	convert_into_be16(IPv4_PROTO, &buffer[2], &buffer[3]);
 	size_t ipv4h_len = 0, tcph_len = 0, buffer_len = 0;
 	ipv4h_len += dump_ipv4_header(ipv4h, buffer, RAW_OFFSET);
 	tcph_len += dump_tcp_header(tcph, buffer, ipv4h_len + RAW_OFFSET);
-	ipv4h->checksum = checksum(buffer + RAW_OFFSET, ipv4h_len / 2);
-	tcph->checksum = checksum(buffer + RAW_OFFSET + ipv4h_len, tcph_len / 2);
 	buffer_len = RAW_OFFSET + ipv4h_len + tcph_len;
+
+	/* let's calculate checksums */
+	pseudo_header = get_pseudo_header(ipv4h);
+	ipv4h->checksum = ipv4_checksum(pseudo_header);
+	tcph->checksum = tcp_checksum(tcph, pseudo_header);
 	convert_into_be16(ipv4h->checksum, &buffer[RAW_OFFSET + 10],
 			  &buffer[RAW_OFFSET + 11]);
 	convert_into_be16(tcph->checksum, &buffer[RAW_OFFSET + ipv4h_len + 16],
 			  &buffer[RAW_OFFSET + ipv4h_len + 17]);
+
+	/* write the buffer over the tunnel device */
 	if (write(nic_fd, buffer, buffer_len) == -1)
 		perror("write over tun");
+
+	free(pseudo_header);
 }
 
 void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,

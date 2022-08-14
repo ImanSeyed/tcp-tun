@@ -10,5 +10,6 @@ void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
 		     uint16_t win_size);
 size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer,
 		       size_t start);
+uint16_t tcp_checksum(struct tcp_header *tcph, uint8_t *pseudo_header);
 
 #endif
