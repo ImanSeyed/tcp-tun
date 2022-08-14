@@ -89,8 +89,6 @@ size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	convert_into_be16(tmp, &buffer[start + 12], &buffer[start + 13]);
 	convert_into_be16(header->win_size, &buffer[start + 14],
 			  &buffer[start + 15]);
-	convert_into_be16(header->checksum, &buffer[start + 16],
-			  &buffer[start + 17]);
 	convert_into_be16(header->urg_pointer, &buffer[start + 18],
 			  &buffer[start + 19]);
 

@@ -81,8 +81,6 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	convert_into_be16(tmp, &buffer[start + 6], &buffer[start + 7]);
 	buffer[start + 8] = header->time_to_live;
 	buffer[start + 9] = header->protocol;
-	convert_into_be16(header->checksum, &buffer[start + 10],
-			  &buffer[start + 11]);
 	convert_into_be32(header->src_addr.byte_value, &buffer[start + 15],
 			  &buffer[start + 14], &buffer[start + 13],
 			  &buffer[start + 12]);

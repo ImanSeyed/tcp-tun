@@ -17,8 +17,13 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	size_t ipv4h_len = 0, tcph_len = 0, buffer_len = 0;
 	ipv4h_len += dump_ipv4_header(ipv4h, buffer, RAW_OFFSET);
 	tcph_len += dump_tcp_header(tcph, buffer, ipv4h_len + RAW_OFFSET);
-	/* apparently kernel does calculate checksum for us, no need to do that here */
+	ipv4h->checksum = checksum(buffer + RAW_OFFSET, ipv4h_len / 2);
+	tcph->checksum = checksum(buffer + RAW_OFFSET + ipv4h_len, tcph_len / 2);
 	buffer_len = RAW_OFFSET + ipv4h_len + tcph_len;
+	convert_into_be16(ipv4h->checksum, &buffer[RAW_OFFSET + 10],
+			  &buffer[RAW_OFFSET + 11]);
+	convert_into_be16(tcph->checksum, &buffer[RAW_OFFSET + ipv4h_len + 16],
+			  &buffer[RAW_OFFSET + ipv4h_len + 17]);
 	if (write(nic_fd, buffer, buffer_len) == -1)
 		perror("write over tun");
 }
