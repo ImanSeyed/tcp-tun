@@ -21,7 +21,7 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	header->identification =
 		convert_from_be16(buffer[start + 4], buffer[start + 5]);
 	header->flags = buffer[start + 6] >> 13;
-	uint8_t fragment_offset[2] = { buffer[start + 6] + buffer[start + 7] };
+	uint8_t fragment_offset[2] = { buffer[start + 6], buffer[start + 7] };
 	uint16_t tmp16;
 	memcpy(&tmp16, fragment_offset, sizeof(uint16_t));
 	header->fragment_offset = tmp16 & 0x1fff;
