@@ -38,8 +38,8 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 	struct TCB starter = {
 		.state = SYNRECVD,
 		.send = { .iss = 0,
-			  .una = starter.send.iss,
-			  .nxt = starter.send.iss,
+			  .una = 0,
+			  .nxt = 0,
 			  .wnd = 10,
 			  .up = false,
 			  .wl1 = 0,
@@ -49,6 +49,9 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 			  .wnd = tcph->win_size,
 			  .up = false },
 	};
+
+	starter.send.una = starter.send.iss;
+	starter.send.nxt = starter.send.iss;
 
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
