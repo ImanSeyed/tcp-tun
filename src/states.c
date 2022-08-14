@@ -82,8 +82,15 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	/* acceptable ACK check (SND.UNA < SEG.ACK =< SND.NXT) */
 	/* TODO: handle synchronized RST */
 	if (!is_between_wrapped(starter->send.una, tcph->ack_number,
-				starter->send.nxt + 1))
+				starter->send.nxt + 1)) {
+		if(!is_synchronized(starter)) {
+			/* according to the Reset Generation, we should send RST */
+			send_rst(nic_fd, ipv4h, tcph, starter);
+		}
 		return;
+	}
+
+	starter->send.una = tcph->ack_number;
 
 	/* zero-length segment has separate rules for acceptance */
 	if (seg_len == 0) {
@@ -112,6 +119,9 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 						     starter->recv.wnd))
 			return;
 	}
+
+	starter->recv.nxt = tcph->seq_number + seg_len;
+	/* TODO: make sure this get ACKed */
 
 	switch (starter->state) {
 	case SYNRECVD:
