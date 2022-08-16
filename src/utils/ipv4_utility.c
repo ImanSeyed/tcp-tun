@@ -129,8 +129,3 @@ uint8_t *get_pseudo_header(struct ipv4_header *header)
 	convert_into_be16(segment_len, &buffer[10], &buffer[11]);
 	return buffer;
 }
-
-uint16_t ipv4_checksum(uint8_t *pseudo_header)
-{
-	return checksum(pseudo_header, PSEUDO_HEADER_SIZE / 2);
-}

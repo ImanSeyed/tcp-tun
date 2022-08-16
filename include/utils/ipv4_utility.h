@@ -12,6 +12,5 @@ void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
 size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer, size_t start);
 uint16_t checksum(void *addr, int count);
 uint8_t *get_pseudo_header(struct ipv4_header *header);
-uint16_t ipv4_checksum(uint8_t *pseudo_header);
 
 #endif
