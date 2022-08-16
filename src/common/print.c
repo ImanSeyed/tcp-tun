@@ -60,7 +60,7 @@ void print_ipv4_header(struct ipv4_header *ipv4h)
 	       "fragment_offset: %u\n"
 	       "time_to_live: %u\n"
 	       "protocol: %u\n"
-	       "checksum: %u\n"
+	       "checksum: %.4x\n"
 	       "src addr: ",
 	       ipv4h->version, ipv4h->ihl, ipv4h->type_of_service,
 	       ipv4h->total_length, ipv4h->identification, ipv4h->flags,
@@ -87,7 +87,7 @@ void print_tcp_header(struct tcp_header *tcph)
 	       "is syn: %u\n"
 	       "is fin: %u\n"
 	       "win size: %u\n"
-	       "checksum: %u\n"
+	       "checksum: %.4x\n"
 	       "urg pointer: %u\n",
 	       tcph->src_port, tcph->dest_port, tcph->seq_number,
 	       tcph->ack_number, tcph->data_offset, tcph->is_urg, tcph->is_ack,
