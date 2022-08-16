@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include "utils/tcp_utility.h"
 #include "utils/ipv4_utility.h"
 #include "common/endian.h"
@@ -74,29 +75,18 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 }
 
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	       struct TCB *starter)
+	       struct TCB *starter, uint8_t *data)
 {
-	uint32_t seg_len = tcph->data_offset * 4;
+	/* first, check that sequence numbers are valid (RFC 793 S3.3) */
+	uint32_t segment_len = tcph->data_offset * 4;
+	uint16_t data_len = ipv4h->total_length - (ipv4h->ihl * 4) - segment_len;
 	if (tcph->is_fin)
-		++seg_len;
+		++segment_len;
 	if (tcph->is_syn)
-		++seg_len;
-	/* first, check that sequence numbers are valid (RFC 793 3.3) */
-	/* acceptable ACK check (SND.UNA < SEG.ACK =< SND.NXT) */
-	/* TODO: handle synchronized RST */
-	if (!is_between_wrapped(starter->send.una, tcph->ack_number,
-				starter->send.nxt + 1)) {
-		if (!is_synchronized(starter)) {
-			/* according to the Reset Generation, we should send RST */
-			send_rst(nic_fd, ipv4h, tcph, starter);
-		}
-		return;
-	}
+		++segment_len;
 
-	starter->send.una = tcph->ack_number;
-
-	/* zero-length segment has separate rules for acceptance */
-	if (seg_len == 0) {
+	if (segment_len == 0) {
+		/* zero-length segment has separate rules for acceptance */
 		if (starter->recv.wnd == 0) {
 			if (tcph->seq_number != starter->recv.nxt)
 				return;
@@ -117,13 +107,34 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 				 starter->recv.nxt - 1, tcph->seq_number,
 				 starter->recv.nxt + starter->recv.wnd) &&
 			 !is_between_wrapped(starter->recv.nxt - 1,
-					     tcph->seq_number + seg_len - 1,
+					     tcph->seq_number + segment_len - 1,
 					     starter->recv.nxt +
 						     starter->recv.wnd))
 			return;
 	}
 
-	starter->recv.nxt = tcph->seq_number + seg_len;
+	if (!tcph->is_ack) {
+		if (tcph->is_syn) {
+			assert(data_len == 0);
+			++starter->recv.nxt;
+		}
+		return;
+	}
+
+	/* acceptable ACK check (SND.UNA < SEG.ACK =< SND.NXT) */
+	/* TODO: handle synchronized RST */
+	if (!is_between_wrapped(starter->send.una, tcph->ack_number,
+				starter->send.nxt + 1)) {
+		if (!is_synchronized(starter)) {
+			/* according to the Reset Generation, we should send RST */
+			send_rst(nic_fd, ipv4h, tcph, starter);
+		}
+		return;
+	}
+
+	starter->send.una = tcph->ack_number;
+
+	starter->recv.nxt = tcph->seq_number + segment_len;
 	/* TODO: make sure this get ACKed */
 
 	switch (starter->state) {

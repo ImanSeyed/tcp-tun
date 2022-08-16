@@ -70,12 +70,19 @@ int main()
 		new_quad.src.port = input_tcp_header.src_port;
 		new_quad.dest.port = input_tcp_header.dest_port;
 
+		uint16_t data_offset = input_ipv4_header.total_length -
+				       ((input_ipv4_header.ihl +
+					 input_tcp_header.data_offset) *
+					4);
+
 		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
-			on_packet(nic, &input_ipv4_header, &input_tcp_header, &starter);
+			on_packet(nic, &input_ipv4_header, &input_tcp_header,
+				  &starter, buffer + data_offset);
 		} else {
 			starter = accept_request(nic, &input_ipv4_header,
-				       &input_tcp_header);
-			connections_set(connections_ht, &new_quad, starter.state);
+						 &input_tcp_header);
+			connections_set(connections_ht, &new_quad,
+					starter.state);
 		}
 		connections_dump(connections_ht);
 		printf("==============================\n");

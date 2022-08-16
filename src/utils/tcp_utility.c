@@ -1,14 +1,11 @@
-#include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "utils/ipv4_utility.h"
 #include "common/endian.h"
 #include "common/types.h"
 
-#define PADDING 8
 #define TCP_MINIMUM_DATA_OFFSET 5
 
 void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
