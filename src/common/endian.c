@@ -2,11 +2,10 @@
 #include <string.h>
 #include "endian.h"
 
-uint16_t convert_from_be16(uint8_t first, uint8_t second)
+uint16_t convert_from_be16(uint8_t *addr)
 {
-	uint8_t src[] = { first, second };
 	uint16_t dest;
-	memcpy(&dest, src, sizeof(uint16_t));
+	memcpy(&dest, addr, sizeof(uint16_t));
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	return __builtin_bswap16(dest);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -27,15 +26,15 @@ uint32_t convert_from_be32(uint8_t first, uint8_t second, uint8_t third,
 #endif
 }
 
-void convert_into_be16(uint16_t data, uint8_t *first, uint8_t *second)
+void convert_into_be16(uint16_t data, uint8_t *addr)
 {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	uint16_t tmp = __builtin_bswap16(data);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 	uint16_t tmp = data;
 #endif
-	*first = tmp & 0xff;
-	*second = tmp >> 8;
+	addr[0] = tmp & 0xff;
+	addr[1] = tmp >> 8;
 }
 
 void convert_into_be32(uint32_t data, uint8_t *first, uint8_t *second,

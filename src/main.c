@@ -36,7 +36,7 @@ int tun_open(char *devname)
 
 int main()
 {
-	int nic, nbytes;
+	int nic;
 	uint8_t buffer[1504];
 	uint16_t eth_type;
 	struct ipv4_header input_ipv4_header;
@@ -47,9 +47,9 @@ int main()
 	connections_ht = connections_create();
 
 	for (;;) {
-		nbytes = read(nic, buffer, sizeof(buffer));
+		read(nic, buffer, sizeof(buffer));
 		/* skipping ethernet flags */
-		eth_type = convert_from_be16(buffer[2], buffer[3]);
+		eth_type = convert_from_be16(buffer + 2);
 
 		/* Ignore everything except IPv4 packets */
 		if (eth_type != 0x0800)

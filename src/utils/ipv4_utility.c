@@ -15,17 +15,15 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	header->version = header_ptr[0] >> 4 & 0xf;
 	header->ihl = header_ptr[0] & 0xf;
 	header->type_of_service = header_ptr[1];
-	header->total_length = convert_from_be16(header_ptr[2], header_ptr[3]);
-	header->identification =
-		convert_from_be16(header_ptr[4], header_ptr[5]);
+	header->total_length = convert_from_be16(header_ptr + 2);
+	header->identification = convert_from_be16(header_ptr + 4);
 	header->flags = header_ptr[6] >> 13;
-	uint8_t fragment_offset[2] = { header_ptr[6], header_ptr[7] };
-	uint16_t tmp16;
-	memcpy(&tmp16, fragment_offset, sizeof(uint16_t));
-	header->fragment_offset = tmp16 & 0x1fff;
+	uint16_t fragment_offset;
+	memcpy(&fragment_offset, header_ptr + 6, sizeof(uint16_t));
+	header->fragment_offset = fragment_offset & 0x1fff;
 	header->time_to_live = header_ptr[8];
 	header->protocol = header_ptr[9];
-	header->checksum = convert_from_be16(header_ptr[10], header_ptr[11]);
+	header->checksum = convert_from_be16(header_ptr + 10);
 	header->src_addr.byte_value = convert_from_be32(
 		header_ptr[15], header_ptr[14], header_ptr[13], header_ptr[12]);
 	header->dest_addr.byte_value = convert_from_be32(
@@ -70,12 +68,11 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	uint8_t *header_ptr = buffer + start;
 	header_ptr[0] = header->version << 4 | header->ihl;
 	header_ptr[1] = header->type_of_service;
-	convert_into_be16(header->total_length, &header_ptr[2], &header_ptr[3]);
-	convert_into_be16(header->identification, &header_ptr[4],
-			  &header_ptr[5]);
+	convert_into_be16(header->total_length, header_ptr + 2);
+	convert_into_be16(header->identification, header_ptr + 4);
 	uint16_t tmp = header->flags;
 	tmp = tmp << 13 | header->fragment_offset;
-	convert_into_be16(tmp, &header_ptr[6], &header_ptr[7]);
+	convert_into_be16(tmp, header_ptr + 6);
 	header_ptr[8] = header->time_to_live;
 	header_ptr[9] = header->protocol;
 	convert_into_be32(header->src_addr.byte_value, &header_ptr[15],
@@ -119,6 +116,6 @@ uint8_t *get_pseudo_header(struct ipv4_header *header)
 			  &buffer[6], &buffer[7]);
 	buffer[9] = header->protocol;
 	uint16_t segment_len = header->total_length - (header->ihl * 4);
-	convert_into_be16(segment_len, &buffer[10], &buffer[11]);
+	convert_into_be16(segment_len, buffer + 10);
 	return buffer;
 }
