@@ -59,8 +59,7 @@ uint32_t convert_ipv4addr_from_be32(uint8_t *addr)
 
 void convert_ipv4addr_into_be32(uint32_t data, uint8_t *addr)
 {
-	uint8_t ip[4];
-	uint8_t reverse_ip[4];
+	uint8_t ip[4], reverse_ip[4];
 	memcpy(ip, &data, sizeof(uint32_t));
 	for (size_t i = 0, j = 3; i < 4; ++i, --j)
 		reverse_ip[i] = ip[j];

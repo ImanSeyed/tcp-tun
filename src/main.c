@@ -17,7 +17,7 @@
 int tun_open(char *devname)
 {
 	struct ifreq ifr;
-	int fd, error;
+	int fd;
 	if ((fd = open("/dev/net/tun", O_RDWR)) == -1) {
 		perror("open /dev/net/tun");
 		exit(EXIT_FAILURE);
@@ -26,7 +26,7 @@ int tun_open(char *devname)
 	ifr.ifr_flags = IFF_TUN;
 	strncpy(ifr.ifr_name, devname, IFNAMSIZ);
 
-	if ((error = ioctl(fd, TUNSETIFF, &ifr)) == -1) {
+	if (ioctl(fd, TUNSETIFF, &ifr) == -1) {
 		perror("ioctl set TUN flag");
 		close(fd);
 		exit(EXIT_FAILURE);

@@ -34,7 +34,7 @@ void print_state(enum tcp_state state)
 		printf("FIN_WAIT1");
 		break;
 	case FINWAIT2:
-		printf("FIN_WAIT1");
+		printf("FIN_WAIT2");
 		break;
 	case CLOSING:
 		printf("CLOSING");
