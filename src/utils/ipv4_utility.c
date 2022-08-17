@@ -24,10 +24,10 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	header->time_to_live = header_ptr[8];
 	header->protocol = header_ptr[9];
 	header->checksum = convert_from_be16(header_ptr + 10);
-	header->src_addr.byte_value = convert_from_be32(
-		header_ptr[15], header_ptr[14], header_ptr[13], header_ptr[12]);
-	header->dest_addr.byte_value = convert_from_be32(
-		header_ptr[19], header_ptr[18], header_ptr[17], header_ptr[16]);
+	header->src_addr.byte_value =
+		convert_ipv4addr_from_be32(header_ptr + 12);
+	header->dest_addr.byte_value =
+		convert_ipv4addr_from_be32(header_ptr + 16);
 
 	assert(header->ihl >= 5);
 	memset(header->options, 0, sizeof(header->options));
@@ -75,10 +75,10 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	convert_into_be16(tmp, header_ptr + 6);
 	header_ptr[8] = header->time_to_live;
 	header_ptr[9] = header->protocol;
-	convert_into_be32(header->src_addr.byte_value, &header_ptr[15],
-			  &header_ptr[14], &header_ptr[13], &header_ptr[12]);
-	convert_into_be32(header->dest_addr.byte_value, &header_ptr[19],
-			  &header_ptr[18], &header_ptr[17], &header_ptr[16]);
+	convert_ipv4addr_into_be32(header->src_addr.byte_value,
+				   header_ptr + 12);
+	convert_ipv4addr_into_be32(header->dest_addr.byte_value,
+				   header_ptr + 16);
 
 	size_t written_bytes = header->options_len + 20;
 	for (size_t i = 20, j = 0; i < written_bytes; ++i, ++j)
@@ -110,10 +110,8 @@ uint8_t *get_pseudo_header(struct ipv4_header *header)
 {
 	uint8_t *buffer = (uint8_t *)malloc(PSEUDO_HEADER_SIZE);
 	memset(buffer, 0, PSEUDO_HEADER_SIZE);
-	convert_into_be32(header->src_addr.byte_value, &buffer[0], &buffer[1],
-			  &buffer[2], &buffer[3]);
-	convert_into_be32(header->dest_addr.byte_value, &buffer[4], &buffer[5],
-			  &buffer[6], &buffer[7]);
+	convert_ipv4addr_into_be32(header->src_addr.byte_value, buffer);
+	convert_ipv4addr_into_be32(header->dest_addr.byte_value, buffer + 4);
 	buffer[9] = header->protocol;
 	uint16_t segment_len = header->total_length - (header->ihl * 4);
 	convert_into_be16(segment_len, buffer + 10);

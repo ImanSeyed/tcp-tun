@@ -13,10 +13,8 @@ void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	uint8_t *header_ptr = buffer + start;
 	header->src_port = convert_from_be16(header_ptr);
 	header->dest_port = convert_from_be16(header_ptr + 2);
-	header->seq_number = convert_from_be32(header_ptr[4], header_ptr[5],
-					       header_ptr[6], header_ptr[7]);
-	header->ack_number = convert_from_be32(header_ptr[8], header_ptr[9],
-					       header_ptr[10], header_ptr[11]);
+	header->seq_number = convert_from_be32(header_ptr + 4);
+	header->ack_number = convert_from_be32(header_ptr + 8);
 	header->data_offset = header_ptr[12] >> 4 & 0xf;
 	header->reserved = 0;
 	header->is_urg = header_ptr[13] >> 5 & 0x1;
@@ -68,10 +66,8 @@ size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	uint8_t *header_ptr = buffer + start;
 	convert_into_be16(header->src_port, header_ptr);
 	convert_into_be16(header->dest_port, header_ptr + 2);
-	convert_into_be32(header->seq_number, &header_ptr[4], &header_ptr[5],
-			  &header_ptr[6], &header_ptr[7]);
-	convert_into_be32(header->ack_number, &header_ptr[8], &header_ptr[9],
-			  &header_ptr[10], &header_ptr[11]);
+	convert_into_be32(header->seq_number, header_ptr + 4);
+	convert_into_be32(header->ack_number, header_ptr + 8);
 	uint16_t tmp = header->data_offset;
 	tmp = (tmp << 12 | (header->is_urg << 5) | (header->is_ack << 4) |
 	       (header->is_psh << 3) | (header->is_rst << 2) |

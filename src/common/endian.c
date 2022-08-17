@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-#include "endian.h"
+#include "common/endian.h"
 
 uint16_t convert_from_be16(uint8_t *addr)
 {
@@ -13,12 +13,10 @@ uint16_t convert_from_be16(uint8_t *addr)
 #endif
 }
 
-uint32_t convert_from_be32(uint8_t first, uint8_t second, uint8_t third,
-			   uint8_t fourth)
+uint32_t convert_from_be32(uint8_t *addr)
 {
-	uint8_t src[] = { first, second, third, fourth };
 	uint32_t dest;
-	memcpy(&dest, src, sizeof(uint32_t));
+	memcpy(&dest, addr, sizeof(uint32_t));
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	return __builtin_bswap32(dest);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -37,17 +35,35 @@ void convert_into_be16(uint16_t data, uint8_t *addr)
 	addr[1] = tmp >> 8;
 }
 
-void convert_into_be32(uint32_t data, uint8_t *first, uint8_t *second,
-		       uint8_t *third, uint8_t *fourth)
+void convert_into_be32(uint32_t data, uint8_t *addr)
 {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	uint32_t tmp = __builtin_bswap32(data);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 	uint32_t tmp = data;
 #endif
-	*first = tmp & 0xff;
-	*second = tmp >> 8;
-	*third = tmp >> 16;
-	*fourth = tmp >> 24;
+	addr[0] = tmp & 0xff;
+	addr[1] = tmp >> 8;
+	addr[2] = tmp >> 16;
+	addr[3] = tmp >> 24;
 }
 
+uint32_t convert_ipv4addr_from_be32(uint8_t *addr)
+{
+	addr += 3;
+	uint8_t ip[4];
+	for (size_t i = 0; i < 4; ++i)
+		ip[i] = *addr--;
+	return convert_from_be32(ip);
+}
+
+void convert_ipv4addr_into_be32(uint32_t data, uint8_t *addr)
+{
+	uint8_t ip[4];
+	uint8_t reverse_ip[4];
+	memcpy(ip, &data, sizeof(uint32_t));
+	for (size_t i = 0, j = 3; i < 4; ++i, --j)
+		reverse_ip[i] = ip[j];
+	memcpy(&data, reverse_ip, sizeof(uint32_t));
+	convert_into_be32(data, addr);
+}
