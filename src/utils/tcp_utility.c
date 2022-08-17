@@ -10,29 +10,24 @@
 
 void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 {
-	header->src_port = convert_from_be16(buffer[start], buffer[start + 1]);
-	header->dest_port =
-		convert_from_be16(buffer[start + 2], buffer[start + 3]);
-	header->seq_number =
-		convert_from_be32(buffer[start + 4], buffer[start + 5],
-				  buffer[start + 6], buffer[start + 7]);
-	header->ack_number =
-		convert_from_be32(buffer[start + 8], buffer[start + 9],
-				  buffer[start + 10], buffer[start + 11]);
-	header->data_offset = buffer[start + 12] >> 4 & 0xf;
+	uint8_t *header_ptr = buffer + start;
+	header->src_port = convert_from_be16(header_ptr[0], header_ptr[1]);
+	header->dest_port = convert_from_be16(header_ptr[2], header_ptr[3]);
+	header->seq_number = convert_from_be32(header_ptr[4], header_ptr[5],
+					       header_ptr[6], header_ptr[7]);
+	header->ack_number = convert_from_be32(header_ptr[8], header_ptr[9],
+					       header_ptr[10], header_ptr[11]);
+	header->data_offset = header_ptr[12] >> 4 & 0xf;
 	header->reserved = 0;
-	header->is_urg = buffer[start + 13] >> 5 & 0x1;
-	header->is_ack = buffer[start + 13] >> 4 & 0x1;
-	header->is_psh = buffer[start + 13] >> 3 & 0x1;
-	header->is_rst = buffer[start + 13] >> 2 & 0x1;
-	header->is_syn = buffer[start + 13] >> 1 & 0x1;
-	header->is_fin = buffer[start + 13] & 0x1;
-	header->win_size =
-		convert_from_be16(buffer[start + 14], buffer[start + 15]);
-	header->checksum =
-		convert_from_be16(buffer[start + 16], buffer[start + 17]);
-	header->urg_pointer =
-		convert_from_be16(buffer[start + 18], buffer[start + 19]);
+	header->is_urg = header_ptr[13] >> 5 & 0x1;
+	header->is_ack = header_ptr[13] >> 4 & 0x1;
+	header->is_psh = header_ptr[13] >> 3 & 0x1;
+	header->is_rst = header_ptr[13] >> 2 & 0x1;
+	header->is_syn = header_ptr[13] >> 1 & 0x1;
+	header->is_fin = header_ptr[13] & 0x1;
+	header->win_size = convert_from_be16(header_ptr[14], header_ptr[15]);
+	header->checksum = convert_from_be16(header_ptr[16], header_ptr[17]);
+	header->urg_pointer = convert_from_be16(header_ptr[18], header_ptr[19]);
 
 	assert(header->data_offset >= 5);
 	memset(header->options, 0, sizeof(header->options));
@@ -41,9 +36,9 @@ void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	} else {
 		header->options_len = (header->data_offset * 4) -
 				      (TCP_MINIMUM_DATA_OFFSET * 4);
-		uint8_t *p = &buffer[start + 20];
-		for (size_t i = 0; i < header->options_len; ++p, ++i)
-			header->options[i] = *p;
+		uint8_t *options_ptr = header_ptr + 20;
+		for (size_t i = 0; i < header->options_len; ++options_ptr, ++i)
+			header->options[i] = *options_ptr;
 	}
 }
 
@@ -70,30 +65,26 @@ void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
 
 size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 {
-	convert_into_be16(header->src_port, &buffer[start + 0],
-			  &buffer[start + 1]);
-	convert_into_be16(header->dest_port, &buffer[start + 2],
-			  &buffer[start + 3]);
-	convert_into_be32(header->seq_number, &buffer[start + 4],
-			  &buffer[start + 5], &buffer[start + 6],
-			  &buffer[start + 7]);
-	convert_into_be32(header->ack_number, &buffer[start + 8],
-			  &buffer[start + 9], &buffer[start + 10],
-			  &buffer[start + 11]);
+	uint8_t *header_ptr = buffer + start;
+	convert_into_be16(header->src_port, &header_ptr[0], &header_ptr[1]);
+	convert_into_be16(header->dest_port, &header_ptr[2], &header_ptr[3]);
+	convert_into_be32(header->seq_number, &header_ptr[4], &header_ptr[5],
+			  &header_ptr[6], &header_ptr[7]);
+	convert_into_be32(header->ack_number, &header_ptr[8], &header_ptr[9],
+			  &header_ptr[10], &header_ptr[11]);
 	uint16_t tmp = header->data_offset;
 	tmp = (tmp << 12 | (header->is_urg << 5) | (header->is_ack << 4) |
 	       (header->is_psh << 3) | (header->is_rst << 2) |
 	       (header->is_syn << 1) | header->is_fin) &
 	      0xf03f;
-	convert_into_be16(tmp, &buffer[start + 12], &buffer[start + 13]);
-	convert_into_be16(header->win_size, &buffer[start + 14],
-			  &buffer[start + 15]);
-	convert_into_be16(header->urg_pointer, &buffer[start + 18],
-			  &buffer[start + 19]);
+	convert_into_be16(tmp, &header_ptr[12], &header_ptr[13]);
+	convert_into_be16(header->win_size, &header_ptr[14], &header_ptr[15]);
+	convert_into_be16(header->urg_pointer, &header_ptr[18],
+			  &header_ptr[19]);
 
 	size_t written_bytes = header->options_len + 20;
 	for (size_t i = 20, j = 0; i < written_bytes; ++i, ++j)
-		buffer[start + i] = header->options[j];
+		header_ptr[i] = header->options[j];
 
 	return written_bytes;
 }
