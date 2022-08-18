@@ -79,4 +79,9 @@ struct connection_quad {
 	struct addrress_pair dest;
 };
 
+struct cksum_vec {
+	const uint8_t *ptr;
+	int len;
+};
+
 #endif
