@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include "utils/ipv4_utility.h"
+#include "common/in_cksum.h"
 #include "common/endian.h"
 #include "common/types.h"
 
@@ -84,11 +84,15 @@ size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	return written_bytes;
 }
 
-uint16_t tcp_checksum(struct tcp_header *tcph, uint8_t *pseudo_header)
+uint16_t tcp_checksum(struct tcp_header *tcph, const uint8_t *pseudo_header)
 {
-	size_t len = PSEUDO_HEADER_SIZE + (tcph->data_offset * 4);
-	uint8_t combination[len];
-	memcpy(combination, pseudo_header, PSEUDO_HEADER_SIZE);
-	dump_tcp_header(tcph, combination, PSEUDO_HEADER_SIZE);
-	return checksum(combination, len / 2);
+	struct cksum_vec vec[2];
+	size_t tcph_len = tcph->data_offset * 4;
+	uint8_t tcph_buff[tcph_len];
+	dump_tcp_header(tcph, tcph_buff, 0);
+	vec[0].ptr = pseudo_header;
+	vec[0].len = PSEUDO_HEADER_SIZE;
+	vec[1].ptr = tcph_buff;
+	vec[1].len = tcph_len;
+	return __builtin_bswap16(in_cksum(vec, 2));
 }

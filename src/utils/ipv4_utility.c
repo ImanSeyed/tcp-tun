@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "common/types.h"
 #include "common/endian.h"
+#include "common/in_cksum.h"
 #include "utils/ipv4_utility.h"
 
 #define IHL_MINIMUM_SIZE 5
@@ -116,4 +117,12 @@ uint8_t *get_pseudo_header(struct ipv4_header *header)
 	uint16_t segment_len = header->total_length - (header->ihl * 4);
 	convert_into_be16(segment_len, buffer + 10);
 	return buffer;
+}
+
+uint16_t ipv4_checksum(uint8_t *ipv4_ptr, int len)
+{
+	struct cksum_vec vec[1];
+	vec[0].ptr = ipv4_ptr;
+	vec[0].len = len;
+	return __builtin_bswap16(in_cksum(vec, 1));
 }
