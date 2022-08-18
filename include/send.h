@@ -1,5 +1,5 @@
-#ifndef TCP_TUN_SEND_H
-#define TCP_TUN_SEND_H
+#ifndef __TCP_TUN_SEND_H__
+#define __TCP_TUN_SEND_H__
 #include <stdint.h>
 #include "common/types.h"
 

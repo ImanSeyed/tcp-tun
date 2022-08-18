@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "utils/ipv4_utility.h"
 #include "utils/tcp_utility.h"
+#include "common/in_cksum.h"
 #include "common/endian.h"
 #include "common/types.h"
 #include "states.h"
@@ -14,6 +15,7 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 uint8_t *buffer)
 {
 	uint8_t *pseudo_header = NULL, *ipv4h_ptr = NULL, *tcph_ptr = NULL;
+	struct cksum_vec vec[1];
 	size_t ipv4h_len, tcph_len, buffer_len;
 	memset(buffer, 0, 1504);
 	convert_into_be16(IPv4_PROTO, buffer + 2);
@@ -25,7 +27,11 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 
 	/* let's calculate checksums */
 	pseudo_header = get_pseudo_header(ipv4h);
-	ipv4h->checksum = checksum(ipv4h_ptr, ipv4h_len / 2);
+	vec[0].ptr = ipv4h_ptr;
+	vec[0].len = ipv4h_len;
+	ipv4h->checksum = __builtin_bswap16(in_cksum(vec, 1));
+	memcpy(ipv4h_ptr + 10, &ipv4h->checksum, sizeof(uint16_t));
+	// ipv4h->checksum = checksum(ipv4h_ptr, ipv4h_len / 2);
 	tcph->checksum = tcp_checksum(tcph, pseudo_header);
 	convert_into_be16(ipv4h->checksum, ipv4h_ptr + 10);
 	convert_into_be16(tcph->checksum, tcph_ptr + 16);

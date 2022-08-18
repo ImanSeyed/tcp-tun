@@ -35,9 +35,9 @@
 *	@(#)in_cksum.c	8.1 (Berkeley) 6/10/93
 */
 
-
 #include <stdint.h>
 #include "common/types.h"
+#include "common/in_cksum.h"
 
 /*
 * Checksum routine for Internet Protocol family headers (Portable Version).
@@ -45,19 +45,6 @@
 * This routine is very heavily used in the network
 * code and should be modified for each CPU to be as fast as possible.
 */
-
-#define ADDCARRY(x)                   \
-	{                             \
-		if ((x) > 65535)      \
-			(x) -= 65535; \
-	}
-#define REDUCE                                   \
-	{                                        \
-		l_util.l = sum;                  \
-		sum = l_util.s[0] + l_util.s[1]; \
-		ADDCARRY(sum);                   \
-	}
-
 
 uint16_t in_cksum(const struct cksum_vec *vec, int veclen)
 {
