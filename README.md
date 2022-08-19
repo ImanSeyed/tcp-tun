@@ -26,4 +26,5 @@ Don't mess with routing stuff if you don't know what you're doing, otherwise you
 
 - [RFC 791](https://datatracker.ietf.org/doc/html/rfc791) (IPv4)
 - [RFC 793](https://datatracker.ietf.org/doc/html/rfc793) (TCP)
-- [RFC 7414](https://datatracker.ietf.org/doc/html/rfc7414#section-2) (A Roadmap for TCP Implementation)
+- [RFC 1071](https://www.rfc-editor.org/rfc/rfc1071) (Checksum calculation)
+- [RFC 7414](https://datatracker.ietf.org/doc/html/rfc7414#section-2) (A roadmap for TCP implementation)
