@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "utils/in_cksum.h"
@@ -84,10 +85,22 @@ size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	return written_bytes;
 }
 
+uint8_t *get_pseudo_header(struct ipv4_header *ipv4h)
+{
+	uint8_t *buffer = (uint8_t *)malloc(PSEUDO_HEADER_SIZE);
+	memset(buffer, 0, PSEUDO_HEADER_SIZE);
+	convert_ipv4addr_into_be32(ipv4h->src_addr.byte_value, buffer);
+	convert_ipv4addr_into_be32(ipv4h->dest_addr.byte_value, buffer + 4);
+	buffer[9] = ipv4h->protocol;
+	uint16_t segment_len = ipv4h->total_length - (ipv4h->ihl * 4);
+	convert_into_be16(segment_len, buffer + 10);
+	return buffer;
+}
+
 uint16_t tcp_checksum(struct tcp_header *tcph, const uint8_t *pseudo_header)
 {
 	struct cksum_vec vec[2];
-	size_t tcph_len = tcph->data_offset * 4;
+	int tcph_len = tcph->data_offset * 4;
 	uint8_t tcph_buff[tcph_len];
 	dump_tcp_header(tcph, tcph_buff, 0);
 	vec[0].ptr = pseudo_header;

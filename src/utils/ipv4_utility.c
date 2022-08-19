@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <string.h>
-#include <stdlib.h>
 #include <assert.h>
 #include "utils/ipv4_utility.h"
 #include "utils/in_cksum.h"
@@ -86,37 +85,6 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 		header_ptr[i] = header->options[j];
 
 	return written_bytes;
-}
-
-uint16_t checksum(void *addr, int count)
-{
-	uint32_t sum = 0;
-	uint16_t *ptr = addr;
-
-	while (count > 1) {
-		sum += *ptr++;
-		count -= 2;
-	}
-
-	if (count > 0)
-		sum += *(uint8_t *)ptr;
-
-	while (sum >> 16)
-		sum = (sum & 0xffff) + (sum >> 16);
-
-	return ~sum;
-}
-
-uint8_t *get_pseudo_header(struct ipv4_header *header)
-{
-	uint8_t *buffer = (uint8_t *)malloc(PSEUDO_HEADER_SIZE);
-	memset(buffer, 0, PSEUDO_HEADER_SIZE);
-	convert_ipv4addr_into_be32(header->src_addr.byte_value, buffer);
-	convert_ipv4addr_into_be32(header->dest_addr.byte_value, buffer + 4);
-	buffer[9] = header->protocol;
-	uint16_t segment_len = header->total_length - (header->ihl * 4);
-	convert_into_be16(segment_len, buffer + 10);
-	return buffer;
 }
 
 uint16_t ipv4_checksum(uint8_t *ipv4_ptr, int len)
