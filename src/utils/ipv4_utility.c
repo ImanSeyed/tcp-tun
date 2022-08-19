@@ -2,10 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "common/types.h"
-#include "common/endian.h"
-#include "common/in_cksum.h"
 #include "utils/ipv4_utility.h"
+#include "utils/in_cksum.h"
+#include "common/endian.h"
+#include "common/types.h"
 
 #define IHL_MINIMUM_SIZE 5
 

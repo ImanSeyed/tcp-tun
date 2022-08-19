@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include "utils/ipv4_utility.h"
 #include "utils/tcp_utility.h"
-#include "common/in_cksum.h"
 #include "common/endian.h"
 #include "common/types.h"
 #include "states.h"

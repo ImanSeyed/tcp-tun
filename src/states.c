@@ -1,12 +1,8 @@
 #include <stdbool.h>
-#include <unistd.h>
 #include <stdint.h>
-#include <string.h>
-#include <stdio.h>
 #include <assert.h>
-#include "utils/tcp_utility.h"
 #include "utils/ipv4_utility.h"
-#include "common/endian.h"
+#include "utils/tcp_utility.h"
 #include "common/types.h"
 #include "states.h"
 #include "send.h"

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include "common/in_cksum.h"
+#include "utils/in_cksum.h"
 #include "common/endian.h"
 #include "common/types.h"
 
