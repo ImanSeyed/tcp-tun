@@ -16,7 +16,7 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	uint8_t *pseudo_header = NULL, *ipv4h_ptr = NULL, *tcph_ptr = NULL;
 	size_t ipv4h_len, tcph_len, buffer_len;
 	memset(buffer, 0, 1504);
-	convert_into_be16(IPv4_PROTO, buffer + 2);
+	write_toggle_endian16(IPv4_PROTO, buffer + 2);
 	ipv4h_len = dump_ipv4_header(ipv4h, buffer, RAW_OFFSET);
 	tcph_len = dump_tcp_header(tcph, buffer, ipv4h_len + RAW_OFFSET);
 	buffer_len = RAW_OFFSET + ipv4h_len + tcph_len;
@@ -28,8 +28,8 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	ipv4h->checksum = ipv4_checksum(ipv4h_ptr, ipv4h_len);
 	memcpy(ipv4h_ptr + 10, &ipv4h->checksum, sizeof(uint16_t));
 	tcph->checksum = tcp_checksum(tcph, pseudo_header);
-	convert_into_be16(ipv4h->checksum, ipv4h_ptr + 10);
-	convert_into_be16(tcph->checksum, tcph_ptr + 16);
+	write_toggle_endian16(ipv4h->checksum, ipv4h_ptr + 10);
+	write_toggle_endian16(tcph->checksum, tcph_ptr + 16);
 
 	/* write the buffer over the tunnel device */
 	if (write(nic_fd, buffer, buffer_len) == -1)

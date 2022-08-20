@@ -2,7 +2,7 @@
 #include <string.h>
 #include "common/endian.h"
 
-uint16_t convert_from_be16(uint8_t *addr)
+uint16_t get_toggle_endian16(uint8_t *addr)
 {
 	uint16_t dest;
 	memcpy(&dest, addr, sizeof(uint16_t));
@@ -13,7 +13,7 @@ uint16_t convert_from_be16(uint8_t *addr)
 #endif
 }
 
-uint32_t convert_from_be32(uint8_t *addr)
+uint32_t get_toggle_endian32(uint8_t *addr)
 {
 	uint32_t dest;
 	memcpy(&dest, addr, sizeof(uint32_t));
@@ -24,7 +24,7 @@ uint32_t convert_from_be32(uint8_t *addr)
 #endif
 }
 
-void convert_into_be16(uint16_t data, uint8_t *addr)
+void write_toggle_endian16(uint16_t data, uint8_t *addr)
 {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	uint16_t tmp = __builtin_bswap16(data);
@@ -35,7 +35,7 @@ void convert_into_be16(uint16_t data, uint8_t *addr)
 	addr[1] = tmp >> 8;
 }
 
-void convert_into_be32(uint32_t data, uint8_t *addr)
+void write_toggle_endian32(uint32_t data, uint8_t *addr)
 {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	uint32_t tmp = __builtin_bswap32(data);
@@ -48,21 +48,21 @@ void convert_into_be32(uint32_t data, uint8_t *addr)
 	addr[3] = tmp >> 24;
 }
 
-uint32_t convert_ipv4addr_from_be32(uint8_t *addr)
+uint32_t get_ipv4addr_toggle_endian32(uint8_t *addr)
 {
 	addr += 3;
 	uint8_t ip[4];
 	for (size_t i = 0; i < 4; ++i)
 		ip[i] = *addr--;
-	return convert_from_be32(ip);
+	return get_toggle_endian32(ip);
 }
 
-void convert_ipv4addr_into_be32(uint32_t data, uint8_t *addr)
+void write_ipv4addr_toggle_endian32(uint32_t data, uint8_t *addr)
 {
 	uint8_t ip[4], reverse_ip[4];
 	memcpy(ip, &data, sizeof(uint32_t));
 	for (size_t i = 0, j = 3; i < 4; ++i, --j)
 		reverse_ip[i] = ip[j];
 	memcpy(&data, reverse_ip, sizeof(uint32_t));
-	convert_into_be32(data, addr);
+	write_toggle_endian32(data, addr);
 }

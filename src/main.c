@@ -49,7 +49,7 @@ int main()
 	for (;;) {
 		read(nic, buffer, sizeof(buffer));
 		/* skipping ethernet flags */
-		eth_type = convert_from_be16(buffer + 2);
+		eth_type = get_toggle_endian16(buffer + 2);
 
 		/* Ignore everything except IPv4 packets */
 		if (eth_type != 0x0800)

@@ -15,19 +15,19 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	header->version = header_ptr[0] >> 4 & 0xf;
 	header->ihl = header_ptr[0] & 0xf;
 	header->type_of_service = header_ptr[1];
-	header->total_length = convert_from_be16(header_ptr + 2);
-	header->identification = convert_from_be16(header_ptr + 4);
+	header->total_length = get_toggle_endian16(header_ptr + 2);
+	header->identification = get_toggle_endian16(header_ptr + 4);
 	header->flags = header_ptr[6] >> 13;
 	uint16_t fragment_offset;
 	memcpy(&fragment_offset, header_ptr + 6, sizeof(uint16_t));
 	header->fragment_offset = fragment_offset & 0x1fff;
 	header->time_to_live = header_ptr[8];
 	header->protocol = header_ptr[9];
-	header->checksum = convert_from_be16(header_ptr + 10);
+	header->checksum = get_toggle_endian16(header_ptr + 10);
 	header->src_addr.byte_value =
-		convert_ipv4addr_from_be32(header_ptr + 12);
+		get_ipv4addr_toggle_endian32(header_ptr + 12);
 	header->dest_addr.byte_value =
-		convert_ipv4addr_from_be32(header_ptr + 16);
+		get_ipv4addr_toggle_endian32(header_ptr + 16);
 
 	assert(header->ihl >= 5);
 	memset(header->options, 0, sizeof(header->options));
@@ -68,16 +68,16 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	uint8_t *header_ptr = buffer + start;
 	header_ptr[0] = header->version << 4 | header->ihl;
 	header_ptr[1] = header->type_of_service;
-	convert_into_be16(header->total_length, header_ptr + 2);
-	convert_into_be16(header->identification, header_ptr + 4);
+	write_toggle_endian16(header->total_length, header_ptr + 2);
+	write_toggle_endian16(header->identification, header_ptr + 4);
 	uint16_t tmp = header->flags;
 	tmp = tmp << 13 | header->fragment_offset;
-	convert_into_be16(tmp, header_ptr + 6);
+	write_toggle_endian16(tmp, header_ptr + 6);
 	header_ptr[8] = header->time_to_live;
 	header_ptr[9] = header->protocol;
-	convert_ipv4addr_into_be32(header->src_addr.byte_value,
+	write_ipv4addr_toggle_endian32(header->src_addr.byte_value,
 				   header_ptr + 12);
-	convert_ipv4addr_into_be32(header->dest_addr.byte_value,
+	write_ipv4addr_toggle_endian32(header->dest_addr.byte_value,
 				   header_ptr + 16);
 
 	size_t written_bytes = header->options_len + 20;
