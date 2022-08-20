@@ -201,10 +201,8 @@ uint16_t in_cksum_shouldbe(uint16_t sum, uint16_t computed_sum)
 	* will be in host byte order, which is what we'll return.
 	*/
 	shouldbe = sum;
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-	compputed_sum = __builtin_bswap32(computed_sum);
-#endif
-	shouldbe += computed_sum;
+
+	shouldbe += __builtin_bswap32(computed_sum);
 	shouldbe = (shouldbe & 0xFFFF) + (shouldbe >> 16);
 	shouldbe = (shouldbe & 0xFFFF) + (shouldbe >> 16);
 	return (uint16_t)shouldbe;
