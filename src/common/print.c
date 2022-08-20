@@ -3,25 +3,25 @@
 #include "common/types.h"
 #include "common/print.h"
 
-void print_ipv4(union ipv4_addr ip)
+void print_ipv4(const union ipv4_addr ip)
 {
 	printf("%u.%u.%u.%u", ip.first, ip.second, ip.third, ip.fourth);
 }
 
-void print_addr(union ipv4_addr ip, uint16_t port)
+void print_addr(const union ipv4_addr ip, uint16_t port)
 {
 	print_ipv4(ip);
 	printf(":%u", port);
 }
 
-void print_bytes(uint8_t *bytes, size_t start, size_t end)
+void print_bytes(const uint8_t *bytes, size_t start, size_t end)
 {
 	for (size_t i = start; i < end; ++i)
 		printf("%.2x ", bytes[i]);
 	printf("\n");
 }
 
-void print_state(enum tcp_state state)
+void print_state(const enum tcp_state state)
 {
 	switch (state) {
 	case SYNRECVD:
@@ -39,17 +39,19 @@ void print_state(enum tcp_state state)
 	case CLOSING:
 		printf("CLOSING");
 		break;
+	default:
+		break;
 	}
 }
 
-void print_quad(struct connection_quad quad)
+void print_quad(const struct connection_quad quad)
 {
 	print_addr(quad.src.ip, quad.src.port);
 	printf(" -> ");
 	print_addr(quad.dest.ip, quad.dest.port);
 }
 
-void print_ipv4_header(struct ipv4_header *ipv4h)
+void print_ipv4_header(const struct ipv4_header *ipv4h)
 {
 	printf("version: %u\n"
 	       "ihl: %u\n"
@@ -73,7 +75,7 @@ void print_ipv4_header(struct ipv4_header *ipv4h)
 	printf("\n");
 }
 
-void print_tcp_header(struct tcp_header *tcph)
+void print_tcp_header(const struct tcp_header *tcph)
 {
 	printf("src port: %u\n"
 	       "dest port: %u\n"
