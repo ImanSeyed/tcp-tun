@@ -105,6 +105,7 @@ uint16_t tcp_checksum(const struct tcp_header *tcph,
 	struct cksum_vec vec[2];
 	int tcph_len = tcph->data_offset * 4;
 	uint8_t tcph_buff[tcph_len];
+	memset(tcph_buff, 0, tcph_len);
 	dump_tcp_header(tcph, tcph_buff, 0);
 	vec[0].ptr = pseudo_header;
 	vec[0].len = PSEUDO_HEADER_SIZE;
