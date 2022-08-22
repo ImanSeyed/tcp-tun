@@ -9,9 +9,10 @@
 
 #define TCP_MINIMUM_DATA_OFFSET 5
 
-void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
+void parse_tcp_header(struct tcp_header *header, const uint8_t *buffer,
+		      size_t start)
 {
-	uint8_t *header_ptr = buffer + start;
+	const uint8_t *header_ptr = buffer + start;
 	header->src_port = get_toggle_endian16(header_ptr);
 	header->dest_port = get_toggle_endian16(header_ptr + 2);
 	header->seq_number = get_toggle_endian32(header_ptr + 4);
@@ -35,9 +36,9 @@ void parse_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	} else {
 		header->options_len = (header->data_offset * 4) -
 				      (TCP_MINIMUM_DATA_OFFSET * 4);
-		uint8_t *options_ptr = header_ptr + 20;
-		for (size_t i = 0; i < header->options_len; ++options_ptr, ++i)
-			header->options[i] = *options_ptr;
+		const uint8_t *options_ptr = header_ptr + 20;
+		for (size_t i = 0; i < header->options_len; ++i)
+			header->options[i] = options_ptr[i];
 	}
 }
 
@@ -62,7 +63,8 @@ void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
 	memset(header->options, 0, sizeof(header->options));
 }
 
-size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
+size_t dump_tcp_header(const struct tcp_header *header, uint8_t *buffer,
+		       size_t start)
 {
 	uint8_t *header_ptr = buffer + start;
 	write_toggle_endian16(header->src_port, header_ptr);
@@ -85,7 +87,7 @@ size_t dump_tcp_header(struct tcp_header *header, uint8_t *buffer, size_t start)
 	return written_bytes;
 }
 
-uint8_t *get_pseudo_header(struct ipv4_header *ipv4h)
+uint8_t *get_pseudo_header(const struct ipv4_header *ipv4h)
 {
 	uint8_t *buffer = (uint8_t *)malloc(PSEUDO_HEADER_SIZE);
 	memset(buffer, 0, PSEUDO_HEADER_SIZE);
@@ -97,7 +99,8 @@ uint8_t *get_pseudo_header(struct ipv4_header *ipv4h)
 	return buffer;
 }
 
-uint16_t tcp_checksum(struct tcp_header *tcph, const uint8_t *pseudo_header)
+uint16_t tcp_checksum(const struct tcp_header *tcph,
+		      const uint8_t *pseudo_header)
 {
 	struct cksum_vec vec[2];
 	int tcph_len = tcph->data_offset * 4;

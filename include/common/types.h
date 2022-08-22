@@ -81,7 +81,7 @@ struct connection_quad {
 
 struct cksum_vec {
 	const uint8_t *ptr;
-	int len;
+	size_t len;
 };
 
 #endif

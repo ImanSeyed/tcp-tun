@@ -3,12 +3,12 @@
 #include "common/types.h"
 #include "common/print.h"
 
-void print_ipv4(const union ipv4_addr ip)
+void print_ipv4(union ipv4_addr ip)
 {
 	printf("%u.%u.%u.%u", ip.first, ip.second, ip.third, ip.fourth);
 }
 
-void print_addr(const union ipv4_addr ip, uint16_t port)
+void print_addr(union ipv4_addr ip, uint16_t port)
 {
 	print_ipv4(ip);
 	printf(":%u", port);
@@ -21,7 +21,7 @@ void print_bytes(const uint8_t *bytes, size_t start, size_t end)
 	printf("\n");
 }
 
-void print_state(const enum tcp_state state)
+void print_state(enum tcp_state state)
 {
 	switch (state) {
 	case SYNRECVD:
@@ -44,7 +44,7 @@ void print_state(const enum tcp_state state)
 	}
 }
 
-void print_quad(const struct connection_quad quad)
+void print_quad(struct connection_quad quad)
 {
 	print_addr(quad.src.ip, quad.src.port);
 	printf(" -> ");

@@ -21,7 +21,7 @@ bool is_between_wrapped(uint32_t start, uint32_t x, uint32_t end)
 	return true;
 }
 
-bool is_synchronized(struct TCB *starter)
+bool is_synchronized(const struct TCB *starter)
 {
 	if (starter->state == SYNRECVD)
 		return false;

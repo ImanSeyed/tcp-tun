@@ -22,7 +22,7 @@ uint32_t pair_hash(uint32_t x, uint32_t y)
 	return xorshift32((x << 3) ^ (y >> 2) ^ (x >> 3) ^ (y << 4));
 }
 
-uint32_t hash_func(struct connection_quad *quad)
+uint32_t hash_func(const struct connection_quad *quad)
 {
 	uint32_t f0 = quad->src.ip.byte_value;
 	uint32_t f1 = quad->dest.ip.byte_value;
@@ -79,8 +79,8 @@ void connections_set(struct connections_hashmap *hashmap,
 	prev->next = connections_pair(key, value);
 }
 
-enum tcp_state *connections_get(struct connections_hashmap *hashmap,
-				struct connection_quad *key)
+enum tcp_state *connections_get(const struct connections_hashmap *hashmap,
+				const struct connection_quad *key)
 {
 	uint32_t slot = hash_func(key);
 	struct connection *entry = hashmap->entries[slot];
@@ -134,7 +134,7 @@ void connections_del(struct connections_hashmap *hashmap,
 	}
 }
 
-void connections_dump(struct connections_hashmap *hashmap)
+void connections_dump(const struct connections_hashmap *hashmap)
 {
 	for (int i = 0; i < TABLE_SIZE; ++i) {
 		struct connection *entry = hashmap->entries[i];

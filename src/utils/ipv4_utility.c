@@ -8,10 +8,10 @@
 
 #define IHL_MINIMUM_SIZE 5
 
-void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
+void parse_ipv4_header(struct ipv4_header *header, const uint8_t *buffer,
 		       size_t start)
 {
-	uint8_t *header_ptr = buffer + start;
+	const uint8_t *header_ptr = buffer + start;
 	header->version = header_ptr[0] >> 4 & 0xf;
 	header->ihl = header_ptr[0] & 0xf;
 	header->type_of_service = header_ptr[1];
@@ -36,9 +36,9 @@ void parse_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	} else {
 		header->options_len =
 			(header->ihl * 4) - (IHL_MINIMUM_SIZE * 4);
-		uint8_t *options_ptr = header_ptr + 20;
-		for (size_t i = 0; i < header->options_len; ++options_ptr, ++i)
-			header->options[i] = *options_ptr;
+		const uint8_t *options_ptr = header_ptr + 20;
+		for (size_t i = 0; i < header->options_len; ++i)
+			header->options[i] = options_ptr[i];
 	}
 }
 
@@ -62,7 +62,7 @@ void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
 	memset(header->options, 0, sizeof(header->options));
 }
 
-size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
+size_t dump_ipv4_header(const struct ipv4_header *header, uint8_t *buffer,
 			size_t start)
 {
 	uint8_t *header_ptr = buffer + start;
@@ -76,9 +76,9 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	header_ptr[8] = header->time_to_live;
 	header_ptr[9] = header->protocol;
 	write_ipv4addr_toggle_endian32(header->src_addr.byte_value,
-				   header_ptr + 12);
+				       header_ptr + 12);
 	write_ipv4addr_toggle_endian32(header->dest_addr.byte_value,
-				   header_ptr + 16);
+				       header_ptr + 16);
 
 	size_t written_bytes = header->options_len + 20;
 	for (size_t i = 20, j = 0; i < written_bytes; ++i, ++j)
@@ -87,7 +87,7 @@ size_t dump_ipv4_header(struct ipv4_header *header, uint8_t *buffer,
 	return written_bytes;
 }
 
-uint16_t ipv4_checksum(uint8_t *ipv4_ptr, int len)
+uint16_t ipv4_checksum(const uint8_t *ipv4_ptr, size_t len)
 {
 	struct cksum_vec vec[1];
 	vec[0].ptr = ipv4_ptr;

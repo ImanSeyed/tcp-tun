@@ -2,7 +2,7 @@
 #include <string.h>
 #include "common/endian.h"
 
-uint16_t get_toggle_endian16(uint8_t *addr)
+uint16_t get_toggle_endian16(const uint8_t *addr)
 {
 	uint16_t dest;
 	memcpy(&dest, addr, sizeof(uint16_t));
@@ -13,7 +13,7 @@ uint16_t get_toggle_endian16(uint8_t *addr)
 #endif
 }
 
-uint32_t get_toggle_endian32(uint8_t *addr)
+uint32_t get_toggle_endian32(const uint8_t *addr)
 {
 	uint32_t dest;
 	memcpy(&dest, addr, sizeof(uint32_t));
@@ -48,12 +48,11 @@ void write_toggle_endian32(uint32_t data, uint8_t *addr)
 	addr[3] = tmp >> 24;
 }
 
-uint32_t get_ipv4addr_toggle_endian32(uint8_t *addr)
+uint32_t get_ipv4addr_toggle_endian32(const uint8_t *addr)
 {
-	addr += 3;
 	uint8_t ip[4];
-	for (size_t i = 0; i < 4; ++i)
-		ip[i] = *addr--;
+	for (size_t i = 0, j = 3; i < 4; ++i, j--)
+		ip[i] = addr[j];
 	return get_toggle_endian32(ip);
 }
 
