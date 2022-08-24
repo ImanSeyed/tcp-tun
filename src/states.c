@@ -53,7 +53,7 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
 	struct ipv4_header ip;
-	uint8_t buffer[1504];
+	uint8_t buffer[1500];
 
 	/* write out the headers */
 	fill_tcp_header(&syn_ack, tcph->dest_port, tcph->src_port,

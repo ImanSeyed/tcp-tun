@@ -8,7 +8,6 @@
  * 2 bytes for ether_flags, 2 bytes for ether_type
  * according to tuntap.txt in Linux kernel documentations
  * */
-#define RAW_OFFSET 4
 
 #define IPv4_PROTO 0x08
 #define TCP_PROTO 0x06

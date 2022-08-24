@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include "utils/ipv4_utility.h"
 #include "utils/tcp_utility.h"
-#include "common/endian.h"
 #include "common/types.h"
 #include "connections.h"
 #include "states.h"
@@ -23,7 +22,7 @@ int tun_open(char *devname)
 		exit(EXIT_FAILURE);
 	}
 	memset(&ifr, 0, sizeof(ifr));
-	ifr.ifr_flags = IFF_TUN;
+	ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
 	strncpy(ifr.ifr_name, devname, IFNAMSIZ);
 
 	if (ioctl(fd, TUNSETIFF, &ifr) == -1) {
@@ -37,8 +36,7 @@ int tun_open(char *devname)
 int main()
 {
 	int nic;
-	uint8_t buffer[1504];
-	uint16_t eth_type;
+	uint8_t buffer[1500];
 	struct ipv4_header input_ipv4_header;
 	struct tcp_header input_tcp_header;
 	struct connections_hashmap *connections_ht;
@@ -48,21 +46,19 @@ int main()
 
 	for (;;) {
 		read(nic, buffer, sizeof(buffer));
-		/* skipping ethernet flags */
-		eth_type = get_toggle_endian16(buffer + 2);
 
 		/* Ignore everything except IPv4 packets */
-		if (eth_type != 0x0800)
+		if (!(buffer[0] >= 0x45 && buffer[0] <= 0x4f))
 			continue;
 
-		parse_ipv4_header(&input_ipv4_header, buffer, RAW_OFFSET);
+		parse_ipv4_header(&input_ipv4_header, buffer, 0);
 
 		/* Ignore everything except TCP packets */
 		if (input_ipv4_header.protocol != TCP_PROTO)
 			continue;
 
 		parse_tcp_header(&input_tcp_header, buffer,
-				 RAW_OFFSET + (input_ipv4_header.ihl * 4));
+				  (input_ipv4_header.ihl * 4));
 
 		struct connection_quad new_quad;
 		new_quad.src.ip = input_ipv4_header.src_addr;

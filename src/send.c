@@ -17,11 +17,11 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	size_t ipv4h_len, tcph_len, buffer_len;
 	memset(buffer, 0, 1504);
 	write_toggle_endian16(IPv4_PROTO, buffer + 2);
-	ipv4h_len = dump_ipv4_header(ipv4h, buffer, RAW_OFFSET);
-	tcph_len = dump_tcp_header(tcph, buffer, ipv4h_len + RAW_OFFSET);
-	buffer_len = RAW_OFFSET + ipv4h_len + tcph_len;
-	ipv4h_ptr = buffer + RAW_OFFSET;
-	tcph_ptr = buffer + RAW_OFFSET + ipv4h_len;
+	ipv4h_len = dump_ipv4_header(ipv4h, buffer, 0);
+	tcph_len = dump_tcp_header(tcph, buffer, ipv4h_len);
+	buffer_len =  ipv4h_len + tcph_len;
+	ipv4h_ptr = buffer;
+	tcph_ptr = buffer +  ipv4h_len;
 
 	/* let's calculate checksums */
 	pseudo_header = get_pseudo_header(ipv4h);
@@ -41,7 +41,7 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	      struct TCB *starter)
 {
-	uint8_t buffer[1504];
+	uint8_t buffer[1500];
 	struct ipv4_header rst_ipv4h;
 	struct tcp_header rst_tcph;
 	/* write out the headers */
@@ -59,7 +59,7 @@ void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 void send_fin(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	      struct TCB *starter)
 {
-	uint8_t buffer[1504];
+	uint8_t buffer[1500];
 	struct ipv4_header fin_ipv4h;
 	struct tcp_header fin_tcph;
 	/* write out the headers */
