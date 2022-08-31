@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <assert.h>
 #include <stdio.h>
 #include "common/types.h"
 #include "common/print.h"
@@ -40,7 +41,8 @@ void print_state(enum tcp_state state)
 		printf("CLOSING");
 		break;
 	default:
-		break;
+		/* MUST NOT be another case */
+		assert(false);
 	}
 }
 

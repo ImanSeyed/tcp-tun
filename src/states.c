@@ -167,5 +167,10 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 * */
 		starter->state = CLOSING;
 		break;
+	case CLOSING:
+		break;
+	default:
+		/* MUST NOT be another case */
+		assert(false);
 	}
 }
