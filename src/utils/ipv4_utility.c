@@ -1,6 +1,7 @@
-#include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "utils/ipv4_utility.h"
 #include "utils/in_cksum.h"
 #include "common/endian.h"
@@ -93,4 +94,26 @@ uint16_t ipv4_checksum(const uint8_t *ipv4_ptr, size_t len)
 	vec[0].ptr = ipv4_ptr;
 	vec[0].len = len;
 	return __builtin_bswap16(in_cksum(vec, 1));
+}
+
+void init_ipv4_addr(union ipv4_addr *addr, uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
+	assert(addr != NULL);
+
+	addr->first = a;
+	addr->second = b;
+	addr->third = c;
+	addr->fourth = d;
+}
+
+char *ipv4_addr_to_str(union ipv4_addr *addr) {
+	assert(addr != NULL);
+
+	char *ipv4_addr_str = calloc(16, sizeof(char));
+	if (ipv4_addr_str == NULL) {
+		perror("ipv4_addr_to_str");
+		return NULL;
+	}
+
+	sprintf(ipv4_addr_str, "%u.%u.%u.%u", addr->first, addr->second, addr->third, addr->fourth);
+	return ipv4_addr_str;
 }

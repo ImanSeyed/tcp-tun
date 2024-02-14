@@ -1,37 +1,12 @@
-#include <linux/if_tun.h>
-#include <sys/ioctl.h>
-#include <linux/if.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
 #include <stdio.h>
+#include <linux/if.h>
 #include "utils/ipv4_utility.h"
 #include "utils/tcp_utility.h"
 #include "common/types.h"
 #include "connections.h"
+#include "utils/tun.h"
 #include "states.h"
-
-int tun_open(char *devname)
-{
-	struct ifreq ifr;
-	int fd;
-	if ((fd = open("/dev/net/tun", O_RDWR)) == -1) {
-		perror("open /dev/net/tun");
-		exit(EXIT_FAILURE);
-	}
-	memset(&ifr, 0, sizeof(ifr));
-	ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
-	strncpy(ifr.ifr_name, devname, IFNAMSIZ);
-
-	if (ioctl(fd, TUNSETIFF, &ifr) == -1) {
-		perror("ioctl set TUN flag");
-		close(fd);
-		exit(EXIT_FAILURE);
-	}
-	return fd;
-}
 
 int main()
 {
@@ -41,8 +16,15 @@ int main()
 	struct tcp_header input_tcp_header;
 	struct connections_hashmap *connections_ht;
 	struct TCB starter;
-	nic = tun_open("tun0");
+	struct ifreq ifr = {0};
+	nic = tun_open("tun0", &ifr);
 	connections_ht = connections_create();
+
+	union ipv4_addr ipv4, subnet;
+	init_ipv4_addr(&ipv4, 192, 168, 20, 1);
+	init_ipv4_addr(&subnet, 255, 255, 255, 0);
+
+	tun_set_ip(nic, &ifr, &ipv4, &subnet);
 
 	for (;;) {
 		read(nic, buffer, sizeof(buffer));
