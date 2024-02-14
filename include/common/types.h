@@ -60,12 +60,17 @@ struct ipv4_header {
 	size_t options_len;
 };
 
+#define ENUMERATE_STATES() \
+	ENUMERATE_STATES_IMPL(SYNRECVD) \
+        ENUMERATE_STATES_IMPL(ESTAB)    \
+        ENUMERATE_STATES_IMPL(FINWAIT1) \
+        ENUMERATE_STATES_IMPL(FINWAIT2) \
+        ENUMERATE_STATES_IMPL(CLOSING)
+
 enum tcp_state {
-	SYNRECVD,
-	ESTAB,
-	FINWAIT1,
-	FINWAIT2,
-	CLOSING,
+#define ENUMERATE_STATES_IMPL(name) name,
+	ENUMERATE_STATES()
+#undef ENUMERATE_STATES_IMPL
 };
 
 struct addrress_pair {

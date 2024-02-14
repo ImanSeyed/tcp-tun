@@ -1,12 +1,14 @@
-#include <stdint.h>
-#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "common/types.h"
 #include "common/print.h"
+#include "utils/ipv4_utility.h"
 
 void print_ipv4(union ipv4_addr ip)
 {
-	printf("%u.%u.%u.%u", ip.first, ip.second, ip.third, ip.fourth);
+	char *ipv4_addr_str = ipv4_addr_to_str(&ip);
+	printf("%s", ipv4_addr_str);
+	free(ipv4_addr_str);
 }
 
 void print_addr(union ipv4_addr ip, uint16_t port)
@@ -24,26 +26,13 @@ void print_bytes(const uint8_t *bytes, size_t start, size_t end)
 
 void print_state(enum tcp_state state)
 {
-	switch (state) {
-	case SYNRECVD:
-		printf("SYN_RECIVED");
-		break;
-	case ESTAB:
-		printf("ESTAB");
-		break;
-	case FINWAIT1:
-		printf("FIN_WAIT1");
-		break;
-	case FINWAIT2:
-		printf("FIN_WAIT2");
-		break;
-	case CLOSING:
-		printf("CLOSING");
-		break;
-	default:
-		/* MUST NOT be another case */
-		assert(false);
-	}
+	const char *STATES_STR[] = {
+#define ENUMERATE_STATES_IMPL(name) #name,
+		ENUMERATE_STATES()
+#undef ENUMERATE_STATES_IMPL
+	};
+
+	printf("%s", STATES_STR[state]);
 }
 
 void print_quad(struct connection_quad quad)
