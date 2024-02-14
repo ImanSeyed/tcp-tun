@@ -153,6 +153,7 @@ void connections_dump(const struct connections_hashmap *hashmap)
 			entry = entry->next;
 		}
 		printf("\n");
+		fflush(stdout);
 	}
 }
 
