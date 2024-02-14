@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdint.h>
 #include <assert.h>
 #include "utils/ipv4_utility.h"
 #include "utils/tcp_utility.h"
