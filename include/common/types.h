@@ -23,13 +23,13 @@ union ipv4_addr {
 	uint32_t byte_value;
 };
 
-struct tcp_header {
+struct [[gnu::packed]] tcp_header {
 	uint16_t src_port;
 	uint16_t dest_port;
 	uint32_t seq_number;
 	uint32_t ack_number;
 	uint8_t data_offset : 4;
-	uint8_t reserved : 6;
+	uint16_t reserved : 6;
 	bool is_urg : 1;
 	bool is_ack : 1;
 	bool is_psh : 1;
@@ -39,33 +39,33 @@ struct tcp_header {
 	uint16_t win_size;
 	uint16_t checksum;
 	uint16_t urg_pointer;
-	uint8_t options[40];
-	size_t options_len;
 };
 
-struct ipv4_header {
-	uint8_t version : 4;
-	uint8_t ihl : 4;
+_Static_assert(sizeof(struct tcp_header) == 20, "TCP header must be 20 bytes.");
+
+struct [[gnu::packed]] ipv4_header {
+	uint8_t version_and_ihl;
 	uint8_t type_of_service;
 	uint16_t total_length;
 	uint16_t identification;
 	uint8_t flags : 3;
 	uint16_t fragment_offset : 13;
-	uint8_t time_to_live;
+	uint8_t ttl;
 	uint8_t protocol;
 	uint16_t checksum;
 	union ipv4_addr src_addr;
 	union ipv4_addr dest_addr;
-	uint8_t options[40];
-	size_t options_len;
 };
 
-#define ENUMERATE_STATES() \
+_Static_assert(sizeof(struct ipv4_header) == 20,
+	       "IPv4 header must be 20 bytes.");
+
+#define ENUMERATE_STATES()              \
 	ENUMERATE_STATES_IMPL(SYNRECVD) \
-        ENUMERATE_STATES_IMPL(ESTAB)    \
-        ENUMERATE_STATES_IMPL(FINWAIT1) \
-        ENUMERATE_STATES_IMPL(FINWAIT2) \
-        ENUMERATE_STATES_IMPL(CLOSING)
+	ENUMERATE_STATES_IMPL(ESTAB)    \
+	ENUMERATE_STATES_IMPL(FINWAIT1) \
+	ENUMERATE_STATES_IMPL(FINWAIT2) \
+	ENUMERATE_STATES_IMPL(CLOSING)
 
 enum tcp_state {
 #define ENUMERATE_STATES_IMPL(name) name,

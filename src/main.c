@@ -16,7 +16,7 @@ int main()
 	struct tcp_header input_tcp_header;
 	struct connections_hashmap *connections_ht;
 	struct TCB starter;
-	struct ifreq ifr = {0};
+	struct ifreq ifr = { 0 };
 	nic = tun_open("tun0", &ifr);
 	connections_ht = connections_create();
 
@@ -39,8 +39,9 @@ int main()
 		if (input_ipv4_header.protocol != TCP_PROTO)
 			continue;
 
-		parse_tcp_header(&input_tcp_header, buffer,
-				  (input_ipv4_header.ihl * 4));
+		parse_tcp_header(
+			&input_tcp_header, buffer,
+			((input_ipv4_header.version_and_ihl & 0x0f) * 4));
 
 		struct connection_quad new_quad;
 		new_quad.src.ip = input_ipv4_header.src_addr;
@@ -48,10 +49,11 @@ int main()
 		new_quad.src.port = input_tcp_header.src_port;
 		new_quad.dest.port = input_tcp_header.dest_port;
 
-		uint16_t data_offset = input_ipv4_header.total_length -
-				       ((input_ipv4_header.ihl +
-					 input_tcp_header.data_offset) *
-					4);
+		uint16_t data_offset =
+			input_ipv4_header.total_length -
+			(((input_ipv4_header.version_and_ihl & 0x0f) +
+			  input_tcp_header.data_offset) *
+			 4);
 
 		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
 			on_packet(nic, &input_ipv4_header, &input_tcp_header,

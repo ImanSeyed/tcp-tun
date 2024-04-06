@@ -19,9 +19,9 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	write_toggle_endian16(IPv4_PROTO, buffer + 2);
 	ipv4h_len = dump_ipv4_header(ipv4h, buffer, 0);
 	tcph_len = dump_tcp_header(tcph, buffer, ipv4h_len);
-	buffer_len =  ipv4h_len + tcph_len;
+	buffer_len = ipv4h_len + tcph_len;
 	ipv4h_ptr = buffer;
-	tcph_ptr = buffer +  ipv4h_len;
+	tcph_ptr = buffer + ipv4h_len;
 
 	/* let's calculate checksums */
 	pseudo_header = get_pseudo_header(ipv4h);
@@ -50,9 +50,8 @@ void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 			starter->send.wnd);
 	rst_tcph.ack_number = 0;
 	rst_tcph.is_rst = true;
-	fill_ipv4_header(&rst_ipv4h,
-			 20 + (rst_tcph.data_offset * 4) + rst_tcph.options_len,
-			 64, TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
+	fill_ipv4_header(&rst_ipv4h, 20 + (rst_tcph.data_offset * 4), 64,
+			 TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &rst_ipv4h, &rst_tcph, buffer);
 }
 
@@ -67,8 +66,7 @@ void send_fin(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 			starter->send.nxt, starter->send.wnd);
 	fin_tcph.ack_number = 0;
 	fin_tcph.is_fin = true;
-	fill_ipv4_header(&fin_ipv4h,
-			 20 + (fin_tcph.data_offset * 4) + fin_tcph.options_len,
-			 64, TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
+	fill_ipv4_header(&fin_ipv4h, 20 + (fin_tcph.data_offset * 4), 64,
+			 TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &fin_ipv4h, &fin_tcph, buffer);
 }

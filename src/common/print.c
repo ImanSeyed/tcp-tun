@@ -55,10 +55,10 @@ void print_ipv4_header(const struct ipv4_header *ipv4h)
 	       "protocol: %u\n"
 	       "checksum: %.4x\n"
 	       "src addr: ",
-	       ipv4h->version, ipv4h->ihl, ipv4h->type_of_service,
-	       ipv4h->total_length, ipv4h->identification, ipv4h->flags,
-	       ipv4h->fragment_offset, ipv4h->time_to_live, ipv4h->protocol,
-	       ipv4h->checksum);
+	       ipv4h->version_and_ihl >> 4, ipv4h->version_and_ihl & 0x0F,
+	       ipv4h->type_of_service, ipv4h->total_length,
+	       ipv4h->identification, ipv4h->flags, ipv4h->fragment_offset,
+	       ipv4h->ttl, ipv4h->protocol, ipv4h->checksum);
 
 	print_ipv4(ipv4h->src_addr);
 	printf("\ndest addr: ");

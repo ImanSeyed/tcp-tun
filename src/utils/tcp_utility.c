@@ -29,16 +29,6 @@ void parse_tcp_header(struct tcp_header *header, const uint8_t *buffer,
 	header->urg_pointer = get_toggle_endian16(header_ptr + 18);
 
 	assert(header->data_offset >= 5);
-	memset(header->options, 0, sizeof(header->options));
-	if (header->data_offset == 5) {
-		header->options_len = 0;
-	} else {
-		header->options_len = (header->data_offset * 4) -
-				      (TCP_MINIMUM_DATA_OFFSET * 4);
-		const uint8_t *options_ptr = header_ptr + 20;
-		for (size_t i = 0; i < header->options_len; ++i)
-			header->options[i] = options_ptr[i];
-	}
 }
 
 void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
@@ -58,8 +48,6 @@ void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
 	header->win_size = win_size;
 	header->checksum = 0;
 	header->urg_pointer = 0;
-	header->options_len = 0;
-	memset(header->options, 0, sizeof(header->options));
 }
 
 size_t dump_tcp_header(const struct tcp_header *header, uint8_t *buffer,
@@ -79,11 +67,8 @@ size_t dump_tcp_header(const struct tcp_header *header, uint8_t *buffer,
 	write_toggle_endian16(header->win_size, header_ptr + 14);
 	write_toggle_endian16(header->urg_pointer, header_ptr + 18);
 
-	size_t written_bytes = header->options_len + 20;
-	for (size_t i = 20, j = 0; i < written_bytes; ++i, ++j)
-		header_ptr[i] = header->options[j];
-
-	return written_bytes;
+	// let's return 20 for now
+	return 20;
 }
 
 uint8_t *get_pseudo_header(const struct ipv4_header *ipv4h)
@@ -93,7 +78,8 @@ uint8_t *get_pseudo_header(const struct ipv4_header *ipv4h)
 	write_ipv4addr_toggle_endian32(ipv4h->src_addr.byte_value, buffer);
 	write_ipv4addr_toggle_endian32(ipv4h->dest_addr.byte_value, buffer + 4);
 	buffer[9] = ipv4h->protocol;
-	uint16_t segment_len = ipv4h->total_length - (ipv4h->ihl * 4);
+	uint16_t segment_len =
+		ipv4h->total_length - ((ipv4h->version_and_ihl & 0x0f) * 4);
 	write_toggle_endian16(segment_len, buffer + 10);
 	return buffer;
 }
