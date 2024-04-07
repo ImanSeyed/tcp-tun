@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "ipv4_utility.h"
+#include "ipv4_header.h"
 #include "tcp_utility.h"
 #include "endian.h"
 #include "types.h"
@@ -16,7 +16,8 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	size_t ipv4h_len, tcph_len, buffer_len;
 	memset(buffer, 0, 1504);
 	write_toggle_endian16(IPV4_PROTO, buffer + 2);
-	ipv4h_len = dump_ipv4_header(ipv4h, buffer, 0);
+	ipv4h_to_buff(ipv4h, buffer, 0);
+	ipv4h_len = ipv4h->version_and_ihl.ihl * 5;
 	tcph_len = dump_tcp_header(tcph, buffer, ipv4h_len);
 	buffer_len = ipv4h_len + tcph_len;
 	ipv4h_ptr = buffer;
@@ -24,7 +25,7 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 
 	/* let's calculate checksums */
 	pseudo_header = get_pseudo_header(ipv4h);
-	ipv4h->checksum = ipv4_checksum(ipv4h_ptr, ipv4h_len);
+	ipv4h->checksum = ipv4h_checksum(ipv4h_ptr, ipv4h_len);
 	memcpy(ipv4h_ptr + 10, &ipv4h->checksum, sizeof(u16));
 	tcph->checksum = tcp_checksum(tcph, pseudo_header);
 	write_toggle_endian16(ipv4h->checksum, ipv4h_ptr + 10);
@@ -49,8 +50,8 @@ void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 			starter->send.wnd);
 	rst_tcph.ack_number = 0;
 	rst_tcph.is_rst = true;
-	fill_ipv4_header(&rst_ipv4h, 20 + (rst_tcph.data_offset * 4), 64,
-			 TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
+	init_ipv4h(&rst_ipv4h, 20 + (rst_tcph.data_offset * 4), 64, TCP_PROTO,
+		   ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &rst_ipv4h, &rst_tcph, buffer);
 }
 
@@ -65,7 +66,7 @@ void send_fin(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 			starter->send.nxt, starter->send.wnd);
 	fin_tcph.ack_number = 0;
 	fin_tcph.is_fin = true;
-	fill_ipv4_header(&fin_ipv4h, 20 + (fin_tcph.data_offset * 4), 64,
-			 TCP_PROTO, ipv4h->dest_addr, ipv4h->src_addr);
+	init_ipv4h(&fin_ipv4h, 20 + (fin_tcph.data_offset * 4), 64, TCP_PROTO,
+		   ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &fin_ipv4h, &fin_tcph, buffer);
 }

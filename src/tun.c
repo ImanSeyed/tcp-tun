@@ -8,7 +8,7 @@
 #include <linux/if_tun.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
-#include "ipv4_utility.h"
+#include "ipv4_addr.h"
 #include "tun.h"
 
 int tun_open(char *devname, struct ifreq *ifr)

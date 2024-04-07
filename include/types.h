@@ -9,7 +9,6 @@
  * according to tuntap.txt in Linux kernel documentations
  * */
 
-#define IPV4_PROTO 0x08
 #define TCP_PROTO 0x06
 #define PSEUDO_HEADER_SIZE 12
 
@@ -22,16 +21,6 @@ typedef int8_t i8;
 typedef int16_t i16;
 typedef int32_t i32;
 typedef int64_t i64;
-
-union ipv4_addr {
-	struct {
-		u8 first;
-		u8 second;
-		u8 third;
-		u8 fourth;
-	};
-	u32 byte_value;
-};
 
 struct [[gnu::packed]] tcp_header {
 	u16 src_port;
@@ -53,23 +42,6 @@ struct [[gnu::packed]] tcp_header {
 
 _Static_assert(sizeof(struct tcp_header) == 20, "TCP header must be 20 bytes.");
 
-struct [[gnu::packed]] ipv4_header {
-	u8 version_and_ihl;
-	u8 type_of_service;
-	u16 total_length;
-	u16 identification;
-	u8 flags : 3;
-	u16 fragment_offset : 13;
-	u8 ttl;
-	u8 protocol;
-	u16 checksum;
-	union ipv4_addr src_addr;
-	union ipv4_addr dest_addr;
-};
-
-_Static_assert(sizeof(struct ipv4_header) == 20,
-	       "IPv4 header must be 20 bytes.");
-
 #define ENUMERATE_STATES()              \
 	ENUMERATE_STATES_IMPL(SYNRECVD) \
 	ENUMERATE_STATES_IMPL(ESTAB)    \
@@ -81,16 +53,6 @@ enum tcp_state {
 #define ENUMERATE_STATES_IMPL(name) name,
 	ENUMERATE_STATES()
 #undef ENUMERATE_STATES_IMPL
-};
-
-struct addrress_pair {
-	union ipv4_addr ip;
-	u16 port;
-};
-
-struct connection_quad {
-	struct addrress_pair src;
-	struct addrress_pair dest;
 };
 
 struct cksum_vec {

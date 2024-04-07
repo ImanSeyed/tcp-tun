@@ -1,7 +1,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <linux/if.h>
-#include "ipv4_utility.h"
+#include "ipv4_addr.h"
+#include "ipv4_header.h"
 #include "tcp_utility.h"
 #include "types.h"
 #include "connections.h"
@@ -33,15 +34,14 @@ int main()
 		if (!(buffer[0] >= 0x45 && buffer[0] <= 0x4f))
 			continue;
 
-		parse_ipv4_header(&input_ipv4_header, buffer, 0);
+		ipv4h_from_buff(&input_ipv4_header, buffer, 0);
 
 		/* Ignore everything except TCP packets */
 		if (input_ipv4_header.protocol != TCP_PROTO)
 			continue;
 
-		parse_tcp_header(
-			&input_tcp_header, buffer,
-			((input_ipv4_header.version_and_ihl & 0x0f) * 4));
+		parse_tcp_header(&input_tcp_header, buffer,
+				 ((input_ipv4_header.version_and_ihl.ihl) * 4));
 
 		struct connection_quad new_quad;
 		new_quad.src.ip = input_ipv4_header.src_addr;
@@ -50,7 +50,7 @@ int main()
 		new_quad.dest.port = input_tcp_header.dest_port;
 
 		u16 data_offset = input_ipv4_header.total_length -
-				  (((input_ipv4_header.version_and_ihl & 0x0f) +
+				  (((input_ipv4_header.version_and_ihl.ihl) +
 				    input_tcp_header.data_offset) *
 				   4);
 

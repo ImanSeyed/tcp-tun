@@ -2,6 +2,8 @@
 #define __TCP_TUN_PRINT_H__
 #include <sys/types.h>
 #include "types.h"
+#include "ipv4_header.h"
+#include "ipv4_addr.h"
 
 void pr_bytes(const u8 *byte, size_t start, size_t end);
 void pr_ipv4(union ipv4_addr ip);

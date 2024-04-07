@@ -3,7 +3,7 @@
 
 #include <sys/ioctl.h>
 #include <linux/if.h>
-#include "types.h"
+#include "ipv4_addr.h"
 
 int tun_open(char *devname, struct ifreq *ifr);
 int tun_set_ip(int nic_fd, struct ifreq *ifr, union ipv4_addr *ip_addr,

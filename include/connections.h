@@ -1,6 +1,7 @@
 #ifndef __TCP_TUN_CONNECTIONS_H__
 #define __TCP_TUN_CONNECTIONS_H__
 #include <stdbool.h>
+#include "ipv4_addr.h"
 #include "types.h"
 
 struct connection {

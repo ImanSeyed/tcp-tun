@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include "types.h"
 #include "print.h"
-#include "ipv4_utility.h"
+#include "ipv4_addr.h"
+#include "ipv4_header.h"
 
 void pr_ipv4(union ipv4_addr ip)
 {
@@ -55,10 +56,11 @@ void pr_ipv4_header(const struct ipv4_header *ipv4h)
 	       "protocol: %u\n"
 	       "checksum: %.4x\n"
 	       "src addr: ",
-	       ipv4h->version_and_ihl >> 4, ipv4h->version_and_ihl & 0x0F,
+	       ipv4h->version_and_ihl.version, ipv4h->version_and_ihl.ihl,
 	       ipv4h->type_of_service, ipv4h->total_length,
-	       ipv4h->identification, ipv4h->flags, ipv4h->fragment_offset,
-	       ipv4h->ttl, ipv4h->protocol, ipv4h->checksum);
+	       ipv4h->identification, ipv4h->flags_and_fragment.flags,
+	       ipv4h->flags_and_fragment.fragment, ipv4h->ttl, ipv4h->protocol,
+	       ipv4h->checksum);
 
 	pr_ipv4(ipv4h->src_addr);
 	printf("\ndest addr: ");

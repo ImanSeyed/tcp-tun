@@ -1,7 +1,7 @@
 #ifndef __TCP_TUN_TCP_UTILITY_H__
 #define __TCP_TUN_TCP_UTILITY_H__
-#include <sys/types.h>
 #include "types.h"
+#include "ipv4_header.h"
 
 void parse_tcp_header(struct tcp_header *header, const u8 *buffer,
 		      size_t start);

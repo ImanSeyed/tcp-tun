@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "ipv4_header.h"
 #include "in_cksum.h"
 #include "endian.h"
 #include "types.h"
@@ -78,7 +79,7 @@ u8 *get_pseudo_header(const struct ipv4_header *ipv4h)
 	write_ipv4addr_toggle_endian32(ipv4h->dest_addr.byte_value, buffer + 4);
 	buffer[9] = ipv4h->protocol;
 	u16 segment_len =
-		ipv4h->total_length - ((ipv4h->version_and_ihl & 0x0f) * 4);
+		ipv4h->total_length - ((ipv4h->version_and_ihl.ihl) * 4);
 	write_toggle_endian16(segment_len, buffer + 10);
 	return buffer;
 }

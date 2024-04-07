@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <assert.h>
-#include "ipv4_utility.h"
+#include "ipv4_header.h"
 #include "tcp_utility.h"
 #include "types.h"
 #include "states.h"
@@ -61,8 +61,8 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 
 	syn_ack.is_syn = true;
 	syn_ack.is_ack = true;
-	fill_ipv4_header(&ip, 20 + (syn_ack.data_offset * 4), 64, TCP_PROTO,
-			 ipv4h->dest_addr, ipv4h->src_addr);
+	init_ipv4h(&ip, 20 + (syn_ack.data_offset * 4), 64, TCP_PROTO,
+		   ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &ip, &syn_ack, buffer);
 
 	return starter;
@@ -74,7 +74,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	/* first, check that sequence numbers are valid (RFC 793 S3.3) */
 	u32 segment_len = tcph->data_offset * 4;
 	u16 data_len = ipv4h->total_length -
-		       ((ipv4h->version_and_ihl & 0x0f) * 4) - segment_len;
+		       ((ipv4h->version_and_ihl.ihl) * 4) - segment_len;
 	if (tcph->is_fin)
 		++segment_len;
 	if (tcph->is_syn)
