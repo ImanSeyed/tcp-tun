@@ -2,7 +2,8 @@
 #define __TCP_TUN_TUN_H__
 
 #include <sys/ioctl.h>
-#include "ipv4_utility.h"
+#include <linux/if.h>
+#include "types.h"
 
 int tun_open(char *devname, struct ifreq *ifr);
 int tun_set_ip(int nic_fd, struct ifreq *ifr, union ipv4_addr *ip_addr,

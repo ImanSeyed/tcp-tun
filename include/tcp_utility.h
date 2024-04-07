@@ -1,7 +1,6 @@
 #ifndef __TCP_TUN_TCP_UTILITY_H__
 #define __TCP_TUN_TCP_UTILITY_H__
 #include <sys/types.h>
-#include <stdint.h>
 #include "types.h"
 
 void parse_tcp_header(struct tcp_header *header, const u8 *buffer,

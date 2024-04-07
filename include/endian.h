@@ -1,6 +1,5 @@
 #ifndef __TCP_TUN_ENDIAN_H__
 #define __TCP_TUN_ENDIAN_H__
-#include <stdint.h>
 #include "types.h"
 
 u16 get_toggle_endian16(const u8 *addr);

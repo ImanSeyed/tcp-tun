@@ -1,7 +1,6 @@
 #ifndef __TCP_TUN_STATES_H__
 #define __TCP_TUN_STATES_H__
 #include <stdbool.h>
-#include <stdint.h>
 #include "types.h"
 
 /*  Send Sequence Space (RFC 793 53.2 Figure 4)
