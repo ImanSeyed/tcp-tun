@@ -15,6 +15,6 @@
 		ADDCARRY(sum);                   \
 	}
 
-uint16_t in_cksum(const struct cksum_vec *vec, int veclen);
+u16 in_cksum(const struct cksum_vec *vec, int veclen);
 
 #endif

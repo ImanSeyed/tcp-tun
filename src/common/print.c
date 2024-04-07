@@ -11,13 +11,13 @@ void print_ipv4(union ipv4_addr ip)
 	free(ipv4_addr_str);
 }
 
-void print_addr(union ipv4_addr ip, uint16_t port)
+void print_addr(union ipv4_addr ip, u16 port)
 {
 	print_ipv4(ip);
 	printf(":%u", port);
 }
 
-void print_bytes(const uint8_t *bytes, size_t start, size_t end)
+void print_bytes(const u8 *bytes, size_t start, size_t end)
 {
 	for (size_t i = start; i < end; ++i)
 		printf("%.2x ", bytes[i]);

@@ -13,46 +13,56 @@
 #define TCP_PROTO 0x06
 #define PSEUDO_HEADER_SIZE 12
 
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
+typedef int8_t i8;
+typedef int16_t i16;
+typedef int32_t i32;
+typedef int64_t i64;
+
 union ipv4_addr {
 	struct {
-		uint8_t first;
-		uint8_t second;
-		uint8_t third;
-		uint8_t fourth;
+		u8 first;
+		u8 second;
+		u8 third;
+		u8 fourth;
 	};
-	uint32_t byte_value;
+	u32 byte_value;
 };
 
 struct [[gnu::packed]] tcp_header {
-	uint16_t src_port;
-	uint16_t dest_port;
-	uint32_t seq_number;
-	uint32_t ack_number;
-	uint8_t data_offset : 4;
-	uint16_t reserved : 6;
+	u16 src_port;
+	u16 dest_port;
+	u32 seq_number;
+	u32 ack_number;
+	u8 data_offset : 4;
+	u16 reserved : 6;
 	bool is_urg : 1;
 	bool is_ack : 1;
 	bool is_psh : 1;
 	bool is_rst : 1;
 	bool is_syn : 1;
 	bool is_fin : 1;
-	uint16_t win_size;
-	uint16_t checksum;
-	uint16_t urg_pointer;
+	u16 win_size;
+	u16 checksum;
+	u16 urg_pointer;
 };
 
 _Static_assert(sizeof(struct tcp_header) == 20, "TCP header must be 20 bytes.");
 
 struct [[gnu::packed]] ipv4_header {
-	uint8_t version_and_ihl;
-	uint8_t type_of_service;
-	uint16_t total_length;
-	uint16_t identification;
-	uint8_t flags : 3;
-	uint16_t fragment_offset : 13;
-	uint8_t ttl;
-	uint8_t protocol;
-	uint16_t checksum;
+	u8 version_and_ihl;
+	u8 type_of_service;
+	u16 total_length;
+	u16 identification;
+	u8 flags : 3;
+	u16 fragment_offset : 13;
+	u8 ttl;
+	u8 protocol;
+	u16 checksum;
 	union ipv4_addr src_addr;
 	union ipv4_addr dest_addr;
 };
@@ -75,7 +85,7 @@ enum tcp_state {
 
 struct addrress_pair {
 	union ipv4_addr ip;
-	uint16_t port;
+	u16 port;
 };
 
 struct connection_quad {
@@ -84,7 +94,7 @@ struct connection_quad {
 };
 
 struct cksum_vec {
-	const uint8_t *ptr;
+	const u8 *ptr;
 	size_t len;
 };
 

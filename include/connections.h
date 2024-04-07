@@ -13,9 +13,9 @@ struct connections_hashmap {
 	struct connection **entries;
 };
 
-uint32_t xorshift32(uint32_t x);
-uint32_t pair_hash(uint32_t x, uint32_t y);
-uint32_t hash_func(const struct connection_quad *quad);
+u32 xorshift32(u32 x);
+u32 pair_hash(u32 x, u32 y);
+u32 hash_func(const struct connection_quad *quad);
 struct connections_hashmap *connections_create(void);
 struct connection *connections_pair(struct connection_quad *key,
 				    enum tcp_state value);

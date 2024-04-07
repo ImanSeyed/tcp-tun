@@ -6,7 +6,7 @@
 #include "states.h"
 #include "send.h"
 
-bool is_between_wrapped(uint32_t start, uint32_t x, uint32_t end)
+bool is_between_wrapped(u32 start, u32 x, u32 end)
 {
 	if (start == x) {
 		return false;
@@ -52,7 +52,7 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
 	struct ipv4_header ip;
-	uint8_t buffer[1500];
+	u8 buffer[1500];
 
 	/* write out the headers */
 	fill_tcp_header(&syn_ack, tcph->dest_port, tcph->src_port,
@@ -69,12 +69,12 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 }
 
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	       struct TCB *starter, uint8_t *data)
+	       struct TCB *starter, u8 *data)
 {
 	/* first, check that sequence numbers are valid (RFC 793 S3.3) */
-	uint32_t segment_len = tcph->data_offset * 4;
-	uint16_t data_len = ipv4h->total_length -
-			    ((ipv4h->version_and_ihl & 0x0f) * 4) - segment_len;
+	u32 segment_len = tcph->data_offset * 4;
+	u16 data_len = ipv4h->total_length -
+		       ((ipv4h->version_and_ihl & 0x0f) * 4) - segment_len;
 	if (tcph->is_fin)
 		++segment_len;
 	if (tcph->is_syn)

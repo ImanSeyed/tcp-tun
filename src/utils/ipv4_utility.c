@@ -9,17 +9,17 @@
 
 #define IHL_MINIMUM_SIZE 5
 
-void parse_ipv4_header(struct ipv4_header *header, const uint8_t *buffer,
+void parse_ipv4_header(struct ipv4_header *header, const u8 *buffer,
 		       size_t start)
 {
-	const uint8_t *header_ptr = buffer + start;
+	const u8 *header_ptr = buffer + start;
 	header->version_and_ihl = header_ptr[0];
 	header->type_of_service = header_ptr[1];
 	header->total_length = get_toggle_endian16(header_ptr + 2);
 	header->identification = get_toggle_endian16(header_ptr + 4);
 	header->flags = header_ptr[6] >> 13;
-	uint16_t fragment_offset;
-	memcpy(&fragment_offset, header_ptr + 6, sizeof(uint16_t));
+	u16 fragment_offset;
+	memcpy(&fragment_offset, header_ptr + 6, sizeof(u16));
 	header->fragment_offset = fragment_offset & 0x1fff;
 	header->ttl = header_ptr[8];
 	header->protocol = header_ptr[9];
@@ -32,9 +32,9 @@ void parse_ipv4_header(struct ipv4_header *header, const uint8_t *buffer,
 	assert((header->version_and_ihl & 0x0f) >= 5);
 }
 
-void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
-		      uint8_t time_to_live, uint8_t protocol,
-		      union ipv4_addr src_addr, union ipv4_addr dest_addr)
+void fill_ipv4_header(struct ipv4_header *header, u16 total_length,
+		      u8 time_to_live, u8 protocol, union ipv4_addr src_addr,
+		      union ipv4_addr dest_addr)
 {
 	header->version_and_ihl = (0x4 << 4) | IHL_MINIMUM_SIZE;
 	header->type_of_service = 0;
@@ -49,15 +49,15 @@ void fill_ipv4_header(struct ipv4_header *header, uint16_t total_length,
 	header->dest_addr = dest_addr;
 }
 
-size_t dump_ipv4_header(const struct ipv4_header *header, uint8_t *buffer,
+size_t dump_ipv4_header(const struct ipv4_header *header, u8 *buffer,
 			size_t start)
 {
-	uint8_t *header_ptr = buffer + start;
+	u8 *header_ptr = buffer + start;
 	header_ptr[0] = header->version_and_ihl;
 	header_ptr[1] = header->type_of_service;
 	write_toggle_endian16(header->total_length, header_ptr + 2);
 	write_toggle_endian16(header->identification, header_ptr + 4);
-	uint16_t tmp = header->flags;
+	u16 tmp = header->flags;
 	tmp = tmp << 13 | header->fragment_offset;
 	write_toggle_endian16(tmp, header_ptr + 6);
 	header_ptr[8] = header->ttl;
@@ -71,7 +71,7 @@ size_t dump_ipv4_header(const struct ipv4_header *header, uint8_t *buffer,
 	return 20;
 }
 
-uint16_t ipv4_checksum(const uint8_t *ipv4_ptr, size_t len)
+u16 ipv4_checksum(const u8 *ipv4_ptr, size_t len)
 {
 	struct cksum_vec vec[1];
 	vec[0].ptr = ipv4_ptr;
@@ -79,8 +79,7 @@ uint16_t ipv4_checksum(const uint8_t *ipv4_ptr, size_t len)
 	return __builtin_bswap16(in_cksum(vec, 1));
 }
 
-void init_ipv4_addr(union ipv4_addr *addr, uint8_t a, uint8_t b, uint8_t c,
-		    uint8_t d)
+void init_ipv4_addr(union ipv4_addr *addr, u8 a, u8 b, u8 c, u8 d)
 {
 	assert(addr != NULL);
 

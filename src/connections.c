@@ -8,7 +8,7 @@
 
 #define TABLE_SIZE 20000
 
-uint32_t xorshift32(uint32_t x)
+u32 xorshift32(u32 x)
 {
 	x ^= ~(x << 15);
 	x += (x >> 10);
@@ -17,18 +17,18 @@ uint32_t xorshift32(uint32_t x)
 	return x;
 }
 
-uint32_t pair_hash(uint32_t x, uint32_t y)
+u32 pair_hash(u32 x, u32 y)
 {
 	return xorshift32((x << 3) ^ (y >> 2) ^ (x >> 3) ^ (y << 4));
 }
 
-uint32_t hash_func(const struct connection_quad *quad)
+u32 hash_func(const struct connection_quad *quad)
 {
-	uint32_t f0 = quad->src.ip.byte_value;
-	uint32_t f1 = quad->dest.ip.byte_value;
-	uint16_t ports[] = { quad->src.port, quad->dest.port };
-	uint32_t f2;
-	memcpy(&f2, ports, sizeof(uint32_t));
+	u32 f0 = quad->src.ip.byte_value;
+	u32 f1 = quad->dest.ip.byte_value;
+	u16 ports[] = { quad->src.port, quad->dest.port };
+	u32 f2;
+	memcpy(&f2, ports, sizeof(u32));
 	return pair_hash(pair_hash(f0, f1), f2) % TABLE_SIZE;
 }
 
@@ -57,7 +57,7 @@ struct connections_hashmap *connections_create(void)
 void connections_set(struct connections_hashmap *hashmap,
 		     struct connection_quad *key, enum tcp_state value)
 {
-	uint32_t slot = hash_func(key);
+	u32 slot = hash_func(key);
 	struct connection *entry = hashmap->entries[slot];
 
 	if (entry == NULL) {
@@ -82,7 +82,7 @@ void connections_set(struct connections_hashmap *hashmap,
 enum tcp_state *connections_get(const struct connections_hashmap *hashmap,
 				const struct connection_quad *key)
 {
-	uint32_t slot = hash_func(key);
+	u32 slot = hash_func(key);
 	struct connection *entry = hashmap->entries[slot];
 	while (entry != NULL) {
 		if (memcmp(&entry->quad, key, sizeof(struct connection_quad)) ==
@@ -96,7 +96,7 @@ enum tcp_state *connections_get(const struct connections_hashmap *hashmap,
 void connections_del(struct connections_hashmap *hashmap,
 		     struct connection_quad *key)
 {
-	uint32_t bucket = hash_func(key);
+	u32 bucket = hash_func(key);
 	struct connection *entry = hashmap->entries[bucket];
 
 	if (entry == NULL)

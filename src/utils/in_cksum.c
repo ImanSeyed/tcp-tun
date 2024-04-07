@@ -46,26 +46,26 @@
 * code and should be modified for each CPU to be as fast as possible.
 */
 
-uint16_t in_cksum(const struct cksum_vec *vec, int veclen)
+u16 in_cksum(const struct cksum_vec *vec, int veclen)
 {
-	const uint16_t *w;
+	const u16 *w;
 	int sum = 0;
 	int mlen = 0;
 	int byte_swapped = 0;
 
 	union {
-		uint8_t c[2];
-		uint16_t s;
+		u8 c[2];
+		u16 s;
 	} s_util;
 	union {
-		uint16_t s[2];
-		uint32_t l;
+		u16 s[2];
+		u32 l;
 	} l_util;
 
 	for (; veclen != 0; vec++, veclen--) {
 		if (vec->len == 0)
 			continue;
-		w = (const uint16_t *)(const void *)vec->ptr;
+		w = (const u16 *)(const void *)vec->ptr;
 		if (mlen == -1) {
 			/*
 			* The first byte of this chunk is the continuation
@@ -75,10 +75,9 @@ uint16_t in_cksum(const struct cksum_vec *vec, int veclen)
 			* s_util.c[0] is already saved when scanning previous
 			* chunk.
 			*/
-			s_util.c[1] = *(const uint8_t *)w;
+			s_util.c[1] = *(const u8 *)w;
 			sum += s_util.s;
-			w = (const uint16_t *)(const void *)((const uint8_t *)w +
-							     1);
+			w = (const u16 *)(const void *)((const u8 *)w + 1);
 			mlen = vec->len - 1;
 		} else
 			mlen = vec->len;
@@ -88,9 +87,8 @@ uint16_t in_cksum(const struct cksum_vec *vec, int veclen)
 		if ((1 & (uintptr_t)w) && (mlen > 0)) {
 			REDUCE;
 			sum <<= 8;
-			s_util.c[0] = *(const uint8_t *)w;
-			w = (const uint16_t *)(const void *)((const uint8_t *)w +
-							     1);
+			s_util.c[0] = *(const u8 *)w;
+			w = (const u16 *)(const void *)((const u8 *)w + 1);
 			mlen--;
 			byte_swapped = 1;
 		}
@@ -137,13 +135,13 @@ uint16_t in_cksum(const struct cksum_vec *vec, int veclen)
 			sum <<= 8;
 			byte_swapped = 0;
 			if (mlen == -1) {
-				s_util.c[1] = *(const uint8_t *)w;
+				s_util.c[1] = *(const u8 *)w;
 				sum += s_util.s;
 				mlen = 0;
 			} else
 				mlen = -1;
 		} else if (mlen == -1)
-			s_util.c[0] = *(const uint8_t *)w;
+			s_util.c[0] = *(const u8 *)w;
 	}
 	if (mlen == -1) {
 		/* The last mbuf has odd # of bytes. Follow the
@@ -162,9 +160,9 @@ uint16_t in_cksum(const struct cksum_vec *vec, int veclen)
 * that the checksum covers (including the checksum itself), compute
 * what the checksum field *should* have been.
 */
-uint16_t in_cksum_shouldbe(uint16_t sum, uint16_t computed_sum)
+u16 in_cksum_shouldbe(u16 sum, u16 computed_sum)
 {
-	uint32_t shouldbe;
+	u32 shouldbe;
 
 	/*
 	* The value that should have gone into the checksum field
@@ -205,5 +203,5 @@ uint16_t in_cksum_shouldbe(uint16_t sum, uint16_t computed_sum)
 	shouldbe += __builtin_bswap32(computed_sum);
 	shouldbe = (shouldbe & 0xFFFF) + (shouldbe >> 16);
 	shouldbe = (shouldbe & 0xFFFF) + (shouldbe >> 16);
-	return (uint16_t)shouldbe;
+	return (u16)shouldbe;
 }

@@ -8,10 +8,9 @@
 
 #define TCP_MINIMUM_DATA_OFFSET 5
 
-void parse_tcp_header(struct tcp_header *header, const uint8_t *buffer,
-		      size_t start)
+void parse_tcp_header(struct tcp_header *header, const u8 *buffer, size_t start)
 {
-	const uint8_t *header_ptr = buffer + start;
+	const u8 *header_ptr = buffer + start;
 	header->src_port = get_toggle_endian16(header_ptr);
 	header->dest_port = get_toggle_endian16(header_ptr + 2);
 	header->seq_number = get_toggle_endian32(header_ptr + 4);
@@ -31,8 +30,8 @@ void parse_tcp_header(struct tcp_header *header, const uint8_t *buffer,
 	assert(header->data_offset >= 5);
 }
 
-void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
-		     uint16_t dest_port, uint32_t seq_number, uint16_t win_size)
+void fill_tcp_header(struct tcp_header *header, u16 src_port, u16 dest_port,
+		     u32 seq_number, u16 win_size)
 {
 	header->src_port = src_port;
 	header->dest_port = dest_port;
@@ -50,15 +49,15 @@ void fill_tcp_header(struct tcp_header *header, uint16_t src_port,
 	header->urg_pointer = 0;
 }
 
-size_t dump_tcp_header(const struct tcp_header *header, uint8_t *buffer,
+size_t dump_tcp_header(const struct tcp_header *header, u8 *buffer,
 		       size_t start)
 {
-	uint8_t *header_ptr = buffer + start;
+	u8 *header_ptr = buffer + start;
 	write_toggle_endian16(header->src_port, header_ptr);
 	write_toggle_endian16(header->dest_port, header_ptr + 2);
 	write_toggle_endian32(header->seq_number, header_ptr + 4);
 	write_toggle_endian32(header->ack_number, header_ptr + 8);
-	uint16_t tmp = header->data_offset;
+	u16 tmp = header->data_offset;
 	tmp = (tmp << 12 | (header->is_urg << 5) | (header->is_ack << 4) |
 	       (header->is_psh << 3) | (header->is_rst << 2) |
 	       (header->is_syn << 1) | header->is_fin) &
@@ -71,25 +70,24 @@ size_t dump_tcp_header(const struct tcp_header *header, uint8_t *buffer,
 	return 20;
 }
 
-uint8_t *get_pseudo_header(const struct ipv4_header *ipv4h)
+u8 *get_pseudo_header(const struct ipv4_header *ipv4h)
 {
-	uint8_t *buffer = (uint8_t *)malloc(PSEUDO_HEADER_SIZE);
+	u8 *buffer = (u8 *)malloc(PSEUDO_HEADER_SIZE);
 	memset(buffer, 0, PSEUDO_HEADER_SIZE);
 	write_ipv4addr_toggle_endian32(ipv4h->src_addr.byte_value, buffer);
 	write_ipv4addr_toggle_endian32(ipv4h->dest_addr.byte_value, buffer + 4);
 	buffer[9] = ipv4h->protocol;
-	uint16_t segment_len =
+	u16 segment_len =
 		ipv4h->total_length - ((ipv4h->version_and_ihl & 0x0f) * 4);
 	write_toggle_endian16(segment_len, buffer + 10);
 	return buffer;
 }
 
-uint16_t tcp_checksum(const struct tcp_header *tcph,
-		      const uint8_t *pseudo_header)
+u16 tcp_checksum(const struct tcp_header *tcph, const u8 *pseudo_header)
 {
 	struct cksum_vec vec[2];
 	int tcph_len = tcph->data_offset * 4;
-	uint8_t tcph_buff[tcph_len];
+	u8 tcph_buff[tcph_len];
 	memset(tcph_buff, 0, tcph_len);
 	dump_tcp_header(tcph, tcph_buff, 0);
 	vec[0].ptr = pseudo_header;

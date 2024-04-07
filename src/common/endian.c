@@ -2,10 +2,10 @@
 #include <string.h>
 #include "common/endian.h"
 
-uint16_t get_toggle_endian16(const uint8_t *addr)
+u16 get_toggle_endian16(const u8 *addr)
 {
-	uint16_t dest;
-	memcpy(&dest, addr, sizeof(uint16_t));
+	u16 dest;
+	memcpy(&dest, addr, sizeof(u16));
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	return __builtin_bswap16(dest);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -13,10 +13,10 @@ uint16_t get_toggle_endian16(const uint8_t *addr)
 #endif
 }
 
-uint32_t get_toggle_endian32(const uint8_t *addr)
+u32 get_toggle_endian32(const u8 *addr)
 {
-	uint32_t dest;
-	memcpy(&dest, addr, sizeof(uint32_t));
+	u32 dest;
+	memcpy(&dest, addr, sizeof(u32));
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	return __builtin_bswap32(dest);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -24,23 +24,23 @@ uint32_t get_toggle_endian32(const uint8_t *addr)
 #endif
 }
 
-void write_toggle_endian16(uint16_t data, uint8_t *addr)
+void write_toggle_endian16(u16 data, u8 *addr)
 {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	uint16_t tmp = __builtin_bswap16(data);
+	u16 tmp = __builtin_bswap16(data);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-	uint16_t tmp = data;
+	u16 tmp = data;
 #endif
 	addr[0] = tmp & 0xff;
 	addr[1] = tmp >> 8;
 }
 
-void write_toggle_endian32(uint32_t data, uint8_t *addr)
+void write_toggle_endian32(u32 data, u8 *addr)
 {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	uint32_t tmp = __builtin_bswap32(data);
+	u32 tmp = __builtin_bswap32(data);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-	uint32_t tmp = data;
+	u32 tmp = data;
 #endif
 	addr[0] = tmp & 0xff;
 	addr[1] = tmp >> 8;
@@ -48,20 +48,20 @@ void write_toggle_endian32(uint32_t data, uint8_t *addr)
 	addr[3] = tmp >> 24;
 }
 
-uint32_t get_ipv4addr_toggle_endian32(const uint8_t *addr)
+u32 get_ipv4addr_toggle_endian32(const u8 *addr)
 {
-	uint8_t ip[4];
+	u8 ip[4];
 	for (size_t i = 0, j = 3; i < 4; ++i, j--)
 		ip[i] = addr[j];
 	return get_toggle_endian32(ip);
 }
 
-void write_ipv4addr_toggle_endian32(uint32_t data, uint8_t *addr)
+void write_ipv4addr_toggle_endian32(u32 data, u8 *addr)
 {
-	uint8_t ip[4], reverse_ip[4];
-	memcpy(ip, &data, sizeof(uint32_t));
+	u8 ip[4], reverse_ip[4];
+	memcpy(ip, &data, sizeof(u32));
 	for (size_t i = 0, j = 3; i < 4; ++i, --j)
 		reverse_ip[i] = ip[j];
-	memcpy(&data, reverse_ip, sizeof(uint32_t));
+	memcpy(&data, reverse_ip, sizeof(u32));
 	write_toggle_endian32(data, addr);
 }

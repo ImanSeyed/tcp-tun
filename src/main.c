@@ -11,7 +11,7 @@
 int main()
 {
 	int nic;
-	uint8_t buffer[1500];
+	u8 buffer[1500];
 	struct ipv4_header input_ipv4_header;
 	struct tcp_header input_tcp_header;
 	struct connections_hashmap *connections_ht;
@@ -49,11 +49,10 @@ int main()
 		new_quad.src.port = input_tcp_header.src_port;
 		new_quad.dest.port = input_tcp_header.dest_port;
 
-		uint16_t data_offset =
-			input_ipv4_header.total_length -
-			(((input_ipv4_header.version_and_ihl & 0x0f) +
-			  input_tcp_header.data_offset) *
-			 4);
+		u16 data_offset = input_ipv4_header.total_length -
+				  (((input_ipv4_header.version_and_ihl & 0x0f) +
+				    input_tcp_header.data_offset) *
+				   4);
 
 		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
 			on_packet(nic, &input_ipv4_header, &input_tcp_header,

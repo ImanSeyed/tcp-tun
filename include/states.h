@@ -18,13 +18,13 @@
  *  */
 
 struct send_sequence_space {
-	uint32_t una; /* send unacknowledged */
-	uint32_t nxt; /* send next */
-	uint16_t wnd; /* send window */
+	u32 una; /* send unacknowledged */
+	u32 nxt; /* send next */
+	u16 wnd; /* send window */
 	bool up; /* send urgent pointer */
 	size_t wl1; /* segment sequence number used for last window update */
 	size_t wl2; /* segment acknowledgment number used for last window update */
-	uint32_t iss; /* initial send sequence number */
+	u32 iss; /* initial send sequence number */
 };
 
 /*  Receive Sequence Space (RFC 793 53.2 Figure 5)
@@ -40,10 +40,10 @@ struct send_sequence_space {
  * */
 
 struct recv_sequence_space {
-	uint32_t nxt; /* receive next */
-	uint16_t wnd; /* receive window */
+	u32 nxt; /* receive next */
+	u16 wnd; /* receive window */
 	bool up; /* receive urgent pointer */
-	uint32_t irs; /* initial receive sequence number */
+	u32 irs; /* initial receive sequence number */
 };
 
 struct TCB {
@@ -55,8 +55,8 @@ struct TCB {
 struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 			  struct tcp_header *tcph);
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	       struct TCB *starter, uint8_t *data);
-bool is_between_wrapped(uint32_t start, uint32_t x, uint32_t end);
+	       struct TCB *starter, u8 *data);
+bool is_between_wrapped(u32 start, u32 x, u32 end);
 bool is_synchronized(const struct TCB *starter);
 
 #endif
