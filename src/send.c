@@ -16,7 +16,7 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	uint8_t *pseudo_header = NULL, *ipv4h_ptr = NULL, *tcph_ptr = NULL;
 	size_t ipv4h_len, tcph_len, buffer_len;
 	memset(buffer, 0, 1504);
-	write_toggle_endian16(IPv4_PROTO, buffer + 2);
+	write_toggle_endian16(IPV4_PROTO, buffer + 2);
 	ipv4h_len = dump_ipv4_header(ipv4h, buffer, 0);
 	tcph_len = dump_tcp_header(tcph, buffer, ipv4h_len);
 	buffer_len = ipv4h_len + tcph_len;

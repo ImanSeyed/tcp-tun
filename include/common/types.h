@@ -9,7 +9,7 @@
  * according to tuntap.txt in Linux kernel documentations
  * */
 
-#define IPv4_PROTO 0x08
+#define IPV4_PROTO 0x08
 #define TCP_PROTO 0x06
 #define PSEUDO_HEADER_SIZE 12
 
