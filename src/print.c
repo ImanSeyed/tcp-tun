@@ -4,27 +4,27 @@
 #include "print.h"
 #include "ipv4_utility.h"
 
-void print_ipv4(union ipv4_addr ip)
+void pr_ipv4(union ipv4_addr ip)
 {
 	char *ipv4_addr_str = ipv4_addr_to_str(&ip);
 	printf("%s", ipv4_addr_str);
 	free(ipv4_addr_str);
 }
 
-void print_addr(union ipv4_addr ip, u16 port)
+void pr_addr(union ipv4_addr ip, u16 port)
 {
-	print_ipv4(ip);
+	pr_ipv4(ip);
 	printf(":%u", port);
 }
 
-void print_bytes(const u8 *bytes, size_t start, size_t end)
+void pr_bytes(const u8 *bytes, size_t start, size_t end)
 {
 	for (size_t i = start; i < end; ++i)
 		printf("%.2x ", bytes[i]);
 	printf("\n");
 }
 
-void print_state(enum tcp_state state)
+void pr_state(enum tcp_state state)
 {
 	const char *STATES_STR[] = {
 #define ENUMERATE_STATES_IMPL(name) #name,
@@ -35,14 +35,14 @@ void print_state(enum tcp_state state)
 	printf("%s", STATES_STR[state]);
 }
 
-void print_quad(struct connection_quad quad)
+void pr_quad(struct connection_quad quad)
 {
-	print_addr(quad.src.ip, quad.src.port);
+	pr_addr(quad.src.ip, quad.src.port);
 	printf(" -> ");
-	print_addr(quad.dest.ip, quad.dest.port);
+	pr_addr(quad.dest.ip, quad.dest.port);
 }
 
-void print_ipv4_header(const struct ipv4_header *ipv4h)
+void pr_ipv4_header(const struct ipv4_header *ipv4h)
 {
 	printf("version: %u\n"
 	       "ihl: %u\n"
@@ -60,13 +60,13 @@ void print_ipv4_header(const struct ipv4_header *ipv4h)
 	       ipv4h->identification, ipv4h->flags, ipv4h->fragment_offset,
 	       ipv4h->ttl, ipv4h->protocol, ipv4h->checksum);
 
-	print_ipv4(ipv4h->src_addr);
+	pr_ipv4(ipv4h->src_addr);
 	printf("\ndest addr: ");
-	print_ipv4(ipv4h->dest_addr);
+	pr_ipv4(ipv4h->dest_addr);
 	printf("\n");
 }
 
-void print_tcp_header(const struct tcp_header *tcph)
+void pr_tcp_header(const struct tcp_header *tcph)
 {
 	printf("src port: %u\n"
 	       "dest port: %u\n"

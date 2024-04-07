@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -144,9 +143,9 @@ void connections_dump(const struct connections_hashmap *hashmap)
 		printf("slot[%u]: ", i);
 
 		for (;;) {
-			print_quad(entry->quad);
+			pr_quad(entry->quad);
 			printf(" => ");
-			print_state(entry->state);
+			pr_state(entry->state);
 			printf(" ");
 			if (entry->next == NULL)
 				break;
