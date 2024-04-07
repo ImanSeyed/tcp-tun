@@ -1,8 +1,8 @@
 #include <stdbool.h>
 #include <assert.h>
-#include "utils/ipv4_utility.h"
-#include "utils/tcp_utility.h"
-#include "common/types.h"
+#include "ipv4_utility.h"
+#include "tcp_utility.h"
+#include "types.h"
 #include "states.h"
 #include "send.h"
 

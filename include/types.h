@@ -1,6 +1,6 @@
 #ifndef __TCP_TUN_TYPES_H__
 #define __TCP_TUN_TYPES_H__
-#include <sys/types.h>
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
 

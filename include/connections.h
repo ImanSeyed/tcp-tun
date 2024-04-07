@@ -1,7 +1,7 @@
 #ifndef __TCP_TUN_CONNECTIONS_H__
 #define __TCP_TUN_CONNECTIONS_H__
 #include <stdbool.h>
-#include "common/types.h"
+#include "types.h"
 
 struct connection {
 	struct connection_quad quad;

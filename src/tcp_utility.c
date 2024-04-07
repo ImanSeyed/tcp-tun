@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "utils/in_cksum.h"
-#include "common/endian.h"
-#include "common/types.h"
+#include "in_cksum.h"
+#include "endian.h"
+#include "types.h"
 
 #define TCP_MINIMUM_DATA_OFFSET 5
 

@@ -36,8 +36,8 @@
 */
 
 #include <stdint.h>
-#include "common/types.h"
-#include "utils/in_cksum.h"
+#include "types.h"
+#include "in_cksum.h"
 
 /*
 * Checksum routine for Internet Protocol family headers (Portable Version).

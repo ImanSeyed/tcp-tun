@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-#include "common/endian.h"
+#include "endian.h"
 
 u16 get_toggle_endian16(const u8 *addr)
 {

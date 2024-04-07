@@ -1,7 +1,7 @@
 #ifndef __TCP_TUN_IN_CKSUM_H__
 #define __TCP_TUN_IN_CKSUM_H__
 #include <stdint.h>
-#include "common/types.h"
+#include "types.h"
 
 #define ADDCARRY(x)                   \
 	{                             \

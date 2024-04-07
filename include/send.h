@@ -1,7 +1,7 @@
 #ifndef __TCP_TUN_SEND_H__
 #define __TCP_TUN_SEND_H__
 #include <stdint.h>
-#include "common/types.h"
+#include "types.h"
 
 void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 u8 *buffer);

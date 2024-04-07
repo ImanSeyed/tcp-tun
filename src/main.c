@@ -1,11 +1,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <linux/if.h>
-#include "utils/ipv4_utility.h"
-#include "utils/tcp_utility.h"
-#include "common/types.h"
+#include "ipv4_utility.h"
+#include "tcp_utility.h"
+#include "types.h"
 #include "connections.h"
-#include "utils/tun.h"
+#include "tun.h"
 #include "states.h"
 
 int main()

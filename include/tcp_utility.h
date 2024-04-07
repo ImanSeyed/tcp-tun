@@ -2,7 +2,7 @@
 #define __TCP_TUN_TCP_UTILITY_H__
 #include <sys/types.h>
 #include <stdint.h>
-#include "common/types.h"
+#include "types.h"
 
 void parse_tcp_header(struct tcp_header *header, const u8 *buffer,
 		      size_t start);

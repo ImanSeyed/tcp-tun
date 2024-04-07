@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "utils/ipv4_utility.h"
-#include "utils/tcp_utility.h"
-#include "common/endian.h"
-#include "common/types.h"
+#include "ipv4_utility.h"
+#include "tcp_utility.h"
+#include "endian.h"
+#include "types.h"
 #include "states.h"
 #include "send.h"
 

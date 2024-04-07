@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "common/types.h"
-#include "common/print.h"
-#include "utils/ipv4_utility.h"
+#include "types.h"
+#include "print.h"
+#include "ipv4_utility.h"
 
 void print_ipv4(union ipv4_addr ip)
 {

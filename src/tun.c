@@ -8,7 +8,7 @@
 #include <linux/if_tun.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
-#include "utils/tun.h"
+#include "tun.h"
 
 int tun_open(char *devname, struct ifreq *ifr)
 {
