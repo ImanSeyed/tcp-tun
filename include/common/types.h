@@ -15,10 +15,10 @@
 
 union ipv4_addr {
 	struct {
-		uint8_t first : 8;
-		uint8_t second : 8;
-		uint8_t third : 8;
-		uint8_t fourth : 8;
+		uint8_t first;
+		uint8_t second;
+		uint8_t third;
+		uint8_t fourth;
 	};
 	uint32_t byte_value;
 };
