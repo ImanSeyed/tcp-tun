@@ -3,7 +3,7 @@
 #include <linux/if.h>
 #include "ipv4_addr.h"
 #include "ipv4_header.h"
-#include "tcp_utility.h"
+#include "tcp_header.h"
 #include "types.h"
 #include "connections.h"
 #include "tun.h"
@@ -40,8 +40,8 @@ int main()
 		if (input_ipv4_header.protocol != TCP_PROTO)
 			continue;
 
-		parse_tcp_header(&input_tcp_header, buffer,
-				 ((input_ipv4_header.version_and_ihl.ihl) * 4));
+		tcph_from_buff(&input_tcp_header, buffer,
+			       ((input_ipv4_header.version_and_ihl.ihl) * 4));
 
 		struct connection_quad new_quad;
 		new_quad.src.ip = input_ipv4_header.src_addr;
@@ -49,10 +49,11 @@ int main()
 		new_quad.src.port = input_tcp_header.src_port;
 		new_quad.dest.port = input_tcp_header.dest_port;
 
-		u16 data_offset = input_ipv4_header.total_length -
-				  (((input_ipv4_header.version_and_ihl.ihl) +
-				    input_tcp_header.data_offset) *
-				   4);
+		u16 data_offset =
+			input_ipv4_header.total_length -
+			(((input_ipv4_header.version_and_ihl.ihl) +
+			  input_tcp_header.flags_and_data_offset.data_offset) *
+			 4);
 
 		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
 			on_packet(nic, &input_ipv4_header, &input_tcp_header,

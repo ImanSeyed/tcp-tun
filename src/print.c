@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "types.h"
 #include "print.h"
+#include "tcp_header.h"
 #include "ipv4_addr.h"
 #include "ipv4_header.h"
 
@@ -54,14 +55,14 @@ void pr_ipv4_header(const struct ipv4_header *ipv4h)
 	       "fragment_offset: %u\n"
 	       "time_to_live: %u\n"
 	       "protocol: %u\n"
-	       "checksum: %.4x\n"
-	       "src addr: ",
+	       "checksum: %.4x\n",
 	       ipv4h->version_and_ihl.version, ipv4h->version_and_ihl.ihl,
 	       ipv4h->type_of_service, ipv4h->total_length,
 	       ipv4h->identification, ipv4h->flags_and_fragment.flags,
 	       ipv4h->flags_and_fragment.fragment, ipv4h->ttl, ipv4h->protocol,
 	       ipv4h->checksum);
 
+	printf("src addr: ");
 	pr_ipv4(ipv4h->src_addr);
 	printf("\ndest addr: ");
 	pr_ipv4(ipv4h->dest_addr);
@@ -75,17 +76,12 @@ void pr_tcp_header(const struct tcp_header *tcph)
 	       "seq number: %u\n"
 	       "ack number: %u\n"
 	       "data offset: %u\n"
-	       "is urg: %u\n"
-	       "is ack: %u\n"
-	       "is psh: %u\n"
-	       "is rst: %u\n"
-	       "is syn: %u\n"
-	       "is fin: %u\n"
+	       "flags: %u\n"
 	       "win size: %u\n"
 	       "checksum: %.4x\n"
 	       "urg pointer: %u\n",
 	       tcph->src_port, tcph->dest_port, tcph->seq_number,
-	       tcph->ack_number, tcph->data_offset, tcph->is_urg, tcph->is_ack,
-	       tcph->is_psh, tcph->is_rst, tcph->is_syn, tcph->is_fin,
-	       tcph->win_size, tcph->checksum, tcph->urg_pointer);
+	       tcph->ack_number, tcph->flags_and_data_offset.data_offset,
+	       tcph->flags_and_data_offset.flags, tcph->win_size,
+	       tcph->checksum, tcph->urg_pointer);
 }

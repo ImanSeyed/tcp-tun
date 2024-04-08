@@ -2,6 +2,7 @@
 #define __TCP_TUN_PRINT_H__
 #include <sys/types.h>
 #include "types.h"
+#include "tcp_header.h"
 #include "ipv4_header.h"
 #include "ipv4_addr.h"
 
