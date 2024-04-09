@@ -11,19 +11,19 @@
 void ipv4h_from_buff(struct ipv4_header *header, const u8 *buffer, size_t start)
 {
 	const u8 *header_ptr = buffer + start;
-	header->version_and_ihl.byte_value = header_ptr[0];
-	header->type_of_service = header_ptr[1];
-	header->total_length = get_toggle_endian16(header_ptr + 2);
-	header->identification = get_toggle_endian16(header_ptr + 4);
+	header->version_and_ihl.byte_value = header_ptr[VERSION_OFF];
+	header->type_of_service = header_ptr[TOS_OFF];
+	header->total_length = get_toggle_endian16(&header_ptr[LENGTH_OFF]);
+	header->identification = get_toggle_endian16(&header_ptr[IDENT_OFF]);
 	header->flags_and_fragment.byte_value =
-		get_toggle_endian16(header_ptr + 6);
-	header->ttl = header_ptr[8];
-	header->protocol = header_ptr[9];
-	header->checksum = get_toggle_endian16(header_ptr + 10);
+		get_toggle_endian16(&header_ptr[IP_FLAGS_OFF]);
+	header->ttl = header_ptr[TTL_OFF];
+	header->protocol = header_ptr[PROTO_OFF];
+	header->checksum = get_toggle_endian16(&header_ptr[IP_CHECKSUM_OFF]);
 	header->src_addr.byte_value =
-		get_ipv4addr_toggle_endian32(header_ptr + 12);
+		get_ipv4addr_toggle_endian32(&header_ptr[SRC_ADDR_OFF]);
 	header->dest_addr.byte_value =
-		get_ipv4addr_toggle_endian32(header_ptr + 16);
+		get_ipv4addr_toggle_endian32(&header_ptr[DST_ADDR_OFF]);
 
 	assert((header->version_and_ihl.ihl) >= 5);
 }
@@ -48,18 +48,18 @@ void init_ipv4h(struct ipv4_header *header, u16 total_length, u8 time_to_live,
 void ipv4h_to_buff(const struct ipv4_header *header, u8 *buffer, size_t start)
 {
 	u8 *header_ptr = buffer + start;
-	header_ptr[0] = header->version_and_ihl.byte_value;
-	header_ptr[1] = header->type_of_service;
-	write_toggle_endian16(header->total_length, header_ptr + 2);
-	write_toggle_endian16(header->identification, header_ptr + 4);
+	header_ptr[VERSION_OFF] = header->version_and_ihl.byte_value;
+	header_ptr[TOS_OFF] = header->type_of_service;
+	write_toggle_endian16(header->total_length, &header_ptr[LENGTH_OFF]);
+	write_toggle_endian16(header->identification, &header_ptr[IDENT_OFF]);
 	write_toggle_endian16(header->flags_and_fragment.byte_value,
-			      header_ptr + 6);
-	header_ptr[8] = header->ttl;
-	header_ptr[9] = header->protocol;
+			      &header_ptr[IP_FLAGS_OFF]);
+	header_ptr[TTL_OFF] = header->ttl;
+	header_ptr[PROTO_OFF] = header->protocol;
 	write_ipv4addr_toggle_endian32(header->src_addr.byte_value,
-				       header_ptr + 12);
+				       &header_ptr[SRC_ADDR_OFF]);
 	write_ipv4addr_toggle_endian32(header->dest_addr.byte_value,
-				       header_ptr + 16);
+				       &header_ptr[DST_ADDR_OFF]);
 }
 
 u16 ipv4h_checksum(const u8 *ipv4_ptr, size_t len)

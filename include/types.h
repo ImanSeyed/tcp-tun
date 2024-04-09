@@ -4,11 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/*
- * 2 bytes for ether_flags, 2 bytes for ether_type
- * according to tuntap.txt in Linux kernel documentations
- * */
-
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;

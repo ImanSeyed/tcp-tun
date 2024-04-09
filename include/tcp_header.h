@@ -6,6 +6,23 @@
 
 #define TCP_PROTO 0x06
 #define PSEUDO_HEADER_SIZE 12
+#define TCP_MINIMUM_DATA_OFFSET 5
+
+// offset of each field in the TCP header
+#define SRC_PORT_OFF 0
+#define DST_PORT_OFF 2
+#define SEQ_NUM_OFF 4
+#define ACK_NUM_OFF 8
+#define TCP_FLAGS_OFF 12
+#define WIN_SIZ_OFF 14
+#define TCP_CHECKSUM_OFF 16
+#define URG_PTR_OFF 18
+
+// offset of each field in the pseudo header
+#define P_SRC_ADDR_OFF 0
+#define P_DST_ADDR_OFF 4
+#define P_PROTO_OFF 9
+#define P_SEG_LEN_OFF 10
 
 enum tcp_flags : u16 {
 	FIN = 0x01,

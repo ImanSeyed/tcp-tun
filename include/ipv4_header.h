@@ -6,6 +6,18 @@
 
 #define IPV4_PROTO 0x08
 
+// offset of each field in the IPv4 header
+#define VERSION_OFF 0
+#define TOS_OFF 1
+#define LENGTH_OFF 2
+#define IDENT_OFF 4
+#define IP_FLAGS_OFF 6
+#define TTL_OFF 8
+#define PROTO_OFF 9
+#define IP_CHECKSUM_OFF 10
+#define SRC_ADDR_OFF 12
+#define DST_ADDR_OFF 16
+
 struct [[gnu::packed]] ipv4_header {
 	union {
 		struct {
