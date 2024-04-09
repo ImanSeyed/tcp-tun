@@ -14,19 +14,6 @@ typedef int16_t i16;
 typedef int32_t i32;
 typedef int64_t i64;
 
-#define ENUMERATE_STATES()              \
-	ENUMERATE_STATES_IMPL(SYNRECVD) \
-	ENUMERATE_STATES_IMPL(ESTAB)    \
-	ENUMERATE_STATES_IMPL(FINWAIT1) \
-	ENUMERATE_STATES_IMPL(FINWAIT2) \
-	ENUMERATE_STATES_IMPL(CLOSING)
-
-enum tcp_state {
-#define ENUMERATE_STATES_IMPL(name) name,
-	ENUMERATE_STATES()
-#undef ENUMERATE_STATES_IMPL
-};
-
 struct cksum_vec {
 	const u8 *ptr;
 	size_t len;

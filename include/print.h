@@ -5,6 +5,7 @@
 #include "tcp_header.h"
 #include "ipv4_header.h"
 #include "ipv4_addr.h"
+#include "states.h"
 
 void pr_bytes(const u8 *byte, size_t start, size_t end);
 void pr_ipv4(union ipv4_addr ip);

@@ -2,7 +2,21 @@
 #define __TCP_TUN_STATES_H__
 #include <stdbool.h>
 #include "ipv4_header.h"
+#include "tcp_header.h"
 #include "types.h"
+
+#define ENUMERATE_STATES()              \
+	ENUMERATE_STATES_IMPL(SYNRECVD) \
+	ENUMERATE_STATES_IMPL(ESTAB)    \
+	ENUMERATE_STATES_IMPL(FINWAIT1) \
+	ENUMERATE_STATES_IMPL(FINWAIT2) \
+	ENUMERATE_STATES_IMPL(CLOSING)
+
+enum tcp_state {
+#define ENUMERATE_STATES_IMPL(name) name,
+	ENUMERATE_STATES()
+#undef ENUMERATE_STATES_IMPL
+};
 
 /*  Send Sequence Space (RFC 793 53.2 Figure 4)
  *

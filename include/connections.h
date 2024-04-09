@@ -2,6 +2,7 @@
 #define __TCP_TUN_CONNECTIONS_H__
 #include <stdbool.h>
 #include "ipv4_addr.h"
+#include "states.h"
 #include "types.h"
 
 struct connection {

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "print.h"
+#include "states.h"
 #include "connections.h"
 
 #define TABLE_SIZE 20000
