@@ -22,7 +22,7 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
         * 2 bytes for ether_flags and 2 bytes for ether_type
         * according to tuntap.txt in section 3.2 "Frame format"
         */
-	write_toggle_endian16(IPV4_PROTO, &buffer[2]);
+	store_swapped_endian16(IPV4_PROTO, &buffer[2]);
 
 	ipv4h_to_buff(ipv4h, buffer, 0);
 	tcph_to_buff(tcph, buffer, ipv4h_len);
@@ -34,8 +34,8 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	ipv4h->checksum = ipv4h_checksum(ipv4h_ptr, ipv4h_len);
 	memcpy(&ipv4h_ptr[IP_CHECKSUM_OFF], &ipv4h->checksum, sizeof(u16));
 	tcph->checksum = tcph_checksum(tcph, pseudo_header);
-	write_toggle_endian16(ipv4h->checksum, &ipv4h_ptr[IP_CHECKSUM_OFF]);
-	write_toggle_endian16(tcph->checksum, &tcph_ptr[TCP_CHECKSUM_OFF]);
+	store_swapped_endian16(ipv4h->checksum, &ipv4h_ptr[IP_CHECKSUM_OFF]);
+	store_swapped_endian16(tcph->checksum, &tcph_ptr[TCP_CHECKSUM_OFF]);
 
 	/* write the buffer over the tunnel device */
 	if (write(nic_fd, buffer, buffer_len) == -1)
