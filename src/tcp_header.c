@@ -55,10 +55,10 @@ u8 *get_pseudo_header(const struct ipv4_header *ipv4h)
 {
 	u8 *buffer = (u8 *)malloc(PSEUDO_HEADER_SIZE);
 	memset(buffer, 0, PSEUDO_HEADER_SIZE);
-	store_ipv4addr_swapped_endian32(ipv4h->src_addr.byte_value,
-					&buffer[P_SRC_ADDR_OFF]);
-	store_ipv4addr_swapped_endian32(ipv4h->dest_addr.byte_value,
-					&buffer[P_DST_ADDR_OFF]);
+	store_swapped_endian32(ipv4h->src_addr.byte_value,
+			       &buffer[P_SRC_ADDR_OFF]);
+	store_swapped_endian32(ipv4h->dest_addr.byte_value,
+			       &buffer[P_DST_ADDR_OFF]);
 	buffer[P_PROTO_OFF] = ipv4h->protocol;
 	u16 segment_len =
 		ipv4h->total_length - ((ipv4h->version_and_ihl.ihl) * 4);

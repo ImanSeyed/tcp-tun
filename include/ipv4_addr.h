@@ -4,10 +4,10 @@
 
 union ipv4_addr {
 	struct {
-		u8 first;
-		u8 second;
-		u8 third;
 		u8 fourth;
+		u8 third;
+		u8 second;
+		u8 first;
 	};
 	u32 byte_value;
 };

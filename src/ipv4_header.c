@@ -21,9 +21,9 @@ void ipv4h_from_buff(struct ipv4_header *header, const u8 *buffer, size_t start)
 	header->protocol = header_ptr[PROTO_OFF];
 	header->checksum = get_swapped_endian16(&header_ptr[IP_CHECKSUM_OFF]);
 	header->src_addr.byte_value =
-		get_ipv4addr_swapped_endian32(&header_ptr[SRC_ADDR_OFF]);
+		get_swapped_endian32(&header_ptr[SRC_ADDR_OFF]);
 	header->dest_addr.byte_value =
-		get_ipv4addr_swapped_endian32(&header_ptr[DST_ADDR_OFF]);
+		get_swapped_endian32(&header_ptr[DST_ADDR_OFF]);
 
 	assert((header->version_and_ihl.ihl) >= 5);
 }
@@ -56,10 +56,10 @@ void ipv4h_to_buff(const struct ipv4_header *header, u8 *buffer, size_t start)
 			       &header_ptr[IP_FLAGS_OFF]);
 	header_ptr[TTL_OFF] = header->ttl;
 	header_ptr[PROTO_OFF] = header->protocol;
-	store_ipv4addr_swapped_endian32(header->src_addr.byte_value,
-					&header_ptr[SRC_ADDR_OFF]);
-	store_ipv4addr_swapped_endian32(header->dest_addr.byte_value,
-					&header_ptr[DST_ADDR_OFF]);
+	store_swapped_endian32(header->src_addr.byte_value,
+			       &header_ptr[SRC_ADDR_OFF]);
+	store_swapped_endian32(header->dest_addr.byte_value,
+			       &header_ptr[DST_ADDR_OFF]);
 }
 
 u16 ipv4h_checksum(const u8 *ipv4_ptr, size_t len)
