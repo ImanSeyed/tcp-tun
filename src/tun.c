@@ -18,7 +18,7 @@ int tun_open(char *devname, struct ifreq *ifr)
 		perror("open /dev/net/tun");
 		exit(EXIT_FAILURE);
 	}
-	ifr->ifr_flags = IFF_TUN | IFF_NO_PI;
+	ifr->ifr_flags = IFF_TUN;
 	strncpy(ifr->ifr_name, devname, IFNAMSIZ);
 
 	if (ioctl(nic_fd, TUNSETIFF, ifr) == -1) {

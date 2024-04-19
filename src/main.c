@@ -12,7 +12,7 @@
 int main()
 {
 	int nic_fd;
-	u8 buffer[1500];
+	u8 packet_with_pi[1504];
 	struct ipv4_header incoming_ipv4h;
 	struct tcp_header incoming_tcph;
 	struct connections_hashmap *connections_ht;
@@ -28,19 +28,20 @@ int main()
 	tun_set_ip(nic_fd, &ifr, &tun_ipv4, &tun_subnet);
 
 	for (;;) {
-		read(nic_fd, buffer, sizeof(buffer));
+		read(nic_fd, packet_with_pi, sizeof(packet_with_pi));
 
 		/* Ignore everything except IPv4 packets */
-		if (!(buffer[0] >= 0x45 && buffer[0] <= 0x4f))
+		if (packet_with_pi[ETH_TYPE_OFF] != IPV4_PROTO)
 			continue;
 
-		ipv4h_from_buff(&incoming_ipv4h, buffer, 0);
+		u8 *packet = &packet_with_pi[PI_LEN];
+		ipv4h_from_buff(&incoming_ipv4h, packet, 0);
 
 		/* Ignore everything except TCP packets */
 		if (incoming_ipv4h.protocol != TCP_PROTO)
 			continue;
 
-		tcph_from_buff(&incoming_tcph, buffer,
+		tcph_from_buff(&incoming_tcph, packet,
 			       ((incoming_ipv4h.version_and_ihl.ihl) * 4));
 
 		struct connection_quad new_quad;
@@ -57,7 +58,7 @@ int main()
 
 		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
 			on_packet(nic_fd, &incoming_ipv4h, &incoming_tcph,
-				  &starter, buffer + data_offset);
+				  &starter, packet + data_offset);
 		} else {
 			starter = accept_request(nic_fd, &incoming_ipv4h,
 						 &incoming_tcph);
