@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "types.h"
 #include "print.h"
 #include "tcp_header.h"
@@ -21,7 +22,8 @@ void pr_addr(union ipv4_addr ip, u16 port)
 
 void pr_bytes(const u8 *bytes, size_t start, size_t end)
 {
-	for (size_t i = start; i < end; ++i)
+	assert(start <= end);
+	for (size_t i = start; i <= end; ++i)
 		printf("%.2x ", bytes[i]);
 	printf("\n");
 }
