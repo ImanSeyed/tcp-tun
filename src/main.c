@@ -18,7 +18,7 @@ int main()
 	struct connections_hashmap *connections_ht;
 	struct TCB starter;
 	struct ifreq ifr = { 0 };
-	nic_fd = tun_open("tun0", &ifr);
+	nic_fd = tun_open("tun%d", &ifr);
 	connections_ht = connections_create();
 
 	union ipv4_addr tun_ipv4, tun_subnet;
