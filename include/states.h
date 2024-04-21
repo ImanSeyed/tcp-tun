@@ -18,7 +18,7 @@ enum tcp_state {
 #undef ENUMERATE_STATES_IMPL
 };
 
-/*  Send Sequence Space (RFC 793 53.2 Figure 4)
+/*  Send Sequence Space (RFC 793 S3.2 Figure 4)
  *
  *             1         2          3          4
  *        ----------|----------|----------|----------
@@ -41,7 +41,7 @@ struct send_sequence_space {
 	u32 iss; /* initial send sequence number */
 };
 
-/*  Receive Sequence Space (RFC 793 53.2 Figure 5)
+/*  Receive Sequence Space (RFC 793 S3.2 Figure 5)
  *
  *            1          2          3
  *        ----------|----------|----------
