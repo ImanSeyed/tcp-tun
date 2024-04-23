@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "ipv4_header.h"
 #include "tcp_header.h"
-#include "endian.h"
 #include "types.h"
 #include "states.h"
 #include "send.h"
@@ -30,7 +29,7 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	/* calculate checksums */
 	pseudo_header = get_pseudo_header(ipv4h);
 	ipv4h->checksum = ipv4h_checksum(ipv4h_ptr, ipv4h_len);
-	tcph->checksum = tcph_checksum(tcph, pseudo_header);
+	tcph->checksum = tcph_checksum(tcph_ptr, tcph_len, pseudo_header);
 	memcpy(&ipv4h_ptr[IP_CHECKSUM_OFF], &ipv4h->checksum, sizeof(u16));
 	memcpy(&tcph_ptr[TCP_CHECKSUM_OFF], &tcph->checksum, sizeof(u16));
 

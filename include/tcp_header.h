@@ -57,7 +57,7 @@ void tcph_from_buff(struct tcp_header *header, const u8 *buffer, size_t start);
 void init_tcph(struct tcp_header *header, u16 src_port, u16 dest_port,
 	       u16 flags, u32 seq_number, u32 ack_number, u16 win_size);
 void tcph_to_buff(const struct tcp_header *header, u8 *buffer, size_t start);
-u16 tcph_checksum(const struct tcp_header *tcph, const u8 *pseudo_header);
+u16 tcph_checksum(const u8 *tcph_buff, size_t len, const u8 *pseudo_header);
 u8 *get_pseudo_header(const struct ipv4_header *header);
 
 #endif

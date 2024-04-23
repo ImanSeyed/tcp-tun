@@ -66,16 +66,12 @@ u8 *get_pseudo_header(const struct ipv4_header *ipv4h)
 	return buffer;
 }
 
-u16 tcph_checksum(const struct tcp_header *tcph, const u8 *pseudo_header)
+u16 tcph_checksum(const u8 *tcph_buff, size_t len, const u8 *pseudo_header)
 {
 	struct cksum_vec vec[2];
-	int tcph_len = tcph->flags_and_data_offset.data_offset * 4;
-	u8 tcph_buff[tcph_len];
-	memset(tcph_buff, 0, tcph_len);
-	tcph_to_buff(tcph, tcph_buff, 0);
 	vec[0].ptr = pseudo_header;
 	vec[0].len = PSEUDO_HEADER_SIZE;
 	vec[1].ptr = tcph_buff;
-	vec[1].len = tcph_len;
+	vec[1].len = len;
 	return in_cksum(vec, 2);
 }
