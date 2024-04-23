@@ -67,5 +67,5 @@ u16 ipv4h_checksum(const u8 *ipv4_ptr, size_t len)
 	struct cksum_vec vec[1];
 	vec[0].ptr = ipv4_ptr;
 	vec[0].len = len;
-	return __builtin_bswap16(in_cksum(vec, 1));
+	return in_cksum(vec, 1);
 }

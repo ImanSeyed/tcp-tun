@@ -77,5 +77,5 @@ u16 tcph_checksum(const struct tcp_header *tcph, const u8 *pseudo_header)
 	vec[0].len = PSEUDO_HEADER_SIZE;
 	vec[1].ptr = tcph_buff;
 	vec[1].len = tcph_len;
-	return __builtin_bswap16(in_cksum(vec, 2));
+	return in_cksum(vec, 2);
 }
