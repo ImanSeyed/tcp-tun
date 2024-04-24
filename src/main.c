@@ -62,8 +62,9 @@ int main()
 						 &incoming_tcph);
 			connections_set(connections_ht, &new_quad,
 					starter.state);
+			connections_dump(connections_ht);
+			printf("==============================\n");
+			fflush(stdout);
 		}
-		connections_dump(connections_ht);
-		printf("==============================\n");
 	}
 }

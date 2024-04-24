@@ -134,6 +134,9 @@ void connections_del(struct connections_hashmap *hashmap,
 	}
 }
 
+/* TODO: iterating through all of indexes of the hashmap
+ * is slow and doesn't make any sense. need to fix this.
+ */
 void connections_dump(const struct connections_hashmap *hashmap)
 {
 	for (int i = 0; i < TABLE_SIZE; ++i) {
@@ -142,16 +145,13 @@ void connections_dump(const struct connections_hashmap *hashmap)
 			continue;
 
 		printf("slot[%u]: ", i);
-
-		for (;;) {
+		do {
 			pr_quad(entry->quad);
 			printf(" => ");
 			pr_state(entry->state);
 			printf(" ");
-			if (entry->next == NULL)
-				break;
 			entry = entry->next;
-		}
+		} while (entry != NULL);
 		printf("\n");
 		fflush(stdout);
 	}
@@ -160,17 +160,12 @@ void connections_dump(const struct connections_hashmap *hashmap)
 bool connections_entry_is_occupied(struct connections_hashmap *hashmap,
 				   struct connection_quad *key)
 {
-	for (int i = 0; i < TABLE_SIZE; ++i) {
-		struct connection *entry = hashmap->entries[i];
-		if (entry == NULL)
-			continue;
-		while (entry->next != NULL) {
-			if (memcmp(&entry->quad, key,
-				   sizeof(struct connection_quad)) == 0) {
-				return true;
-			}
-			entry = entry->next;
-		}
-	}
+	u32 slot = hash_func(key);
+	struct connection *entry = hashmap->entries[slot];
+	if (entry == NULL)
+		goto notfound;
+	if (!memcmp(&entry->quad, key, sizeof(struct connection_quad)))
+		return true;
+notfound:
 	return false;
 }
