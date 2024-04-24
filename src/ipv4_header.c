@@ -25,7 +25,7 @@ void ipv4h_from_buff(struct ipv4_header *header, const u8 *buffer, size_t start)
 	header->dest_addr.byte_value =
 		get_swapped_endian32(&header_ptr[DST_ADDR_OFF]);
 
-	assert((header->version_and_ihl.ihl) >= 5);
+	assert(ipv4h_size(header) >= 20);
 }
 
 void init_ipv4h(struct ipv4_header *header, u16 total_length, u8 time_to_live,

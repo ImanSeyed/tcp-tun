@@ -21,7 +21,7 @@ void tcph_from_buff(struct tcp_header *header, const u8 *buffer, size_t start)
 	header->checksum = get_swapped_endian16(&header_ptr[TCP_CHECKSUM_OFF]);
 	header->urg_pointer = get_swapped_endian16(&header_ptr[URG_PTR_OFF]);
 
-	assert(header->flags_and_data_offset.data_offset >= 5);
+	assert(tcph_size(header) >= 20);
 }
 
 void init_tcph(struct tcp_header *header, u16 src_port, u16 dest_port,
@@ -60,8 +60,7 @@ u8 *get_pseudo_header(const struct ipv4_header *ipv4h)
 	store_swapped_endian32(ipv4h->dest_addr.byte_value,
 			       &buffer[P_DST_ADDR_OFF]);
 	buffer[P_PROTO_OFF] = ipv4h->protocol;
-	u16 segment_len =
-		ipv4h->total_length - ((ipv4h->version_and_ihl.ihl) * 4);
+	u16 segment_len = ipv4h->total_length - ipv4h_size(ipv4h);
 	store_swapped_endian16(segment_len, &buffer[P_SEG_LEN_OFF]);
 	return buffer;
 }

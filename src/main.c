@@ -42,7 +42,7 @@ int main()
 			continue;
 
 		tcph_from_buff(&incoming_tcph, packet,
-			       ((incoming_ipv4h.version_and_ihl.ihl) * 4));
+			       ipv4h_size(&incoming_ipv4h));
 
 		struct connection_quad new_quad;
 		new_quad.src.ip = incoming_ipv4h.src_addr;
@@ -50,11 +50,9 @@ int main()
 		new_quad.src.port = incoming_tcph.src_port;
 		new_quad.dest.port = incoming_tcph.dest_port;
 
-		u16 data_offset =
-			incoming_ipv4h.total_length -
-			(((incoming_ipv4h.version_and_ihl.ihl) +
-			  incoming_tcph.flags_and_data_offset.data_offset) *
-			 4);
+		u16 data_offset = incoming_ipv4h.total_length -
+				  (ipv4h_size(&incoming_ipv4h) +
+				   tcph_size(&incoming_tcph));
 
 		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
 			on_packet(nic_fd, &incoming_ipv4h, &incoming_tcph,

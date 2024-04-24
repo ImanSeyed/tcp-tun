@@ -48,8 +48,7 @@ void pr_quad(struct connection_quad quad)
 
 void pr_ipv4_header(const struct ipv4_header *ipv4h)
 {
-	printf("version: %u\n"
-	       "ihl: %u\n"
+	printf("header size: %u\n"
 	       "type_of_service: %u\n"
 	       "total_length: %u\n"
 	       "identification: %u\n"
@@ -58,10 +57,9 @@ void pr_ipv4_header(const struct ipv4_header *ipv4h)
 	       "time_to_live: %u\n"
 	       "protocol: %u\n"
 	       "checksum: %.4x\n",
-	       ipv4h->version_and_ihl.version, ipv4h->version_and_ihl.ihl,
-	       ipv4h->type_of_service, ipv4h->total_length,
-	       ipv4h->identification, ipv4h->flags_and_fragment.flags,
-	       ipv4h->flags_and_fragment.fragment, ipv4h->ttl, ipv4h->protocol,
+	       ipv4h_size(ipv4h), ipv4h->type_of_service, ipv4h->total_length,
+	       ipv4h->identification, ipv4h_flags(ipv4h),
+	       ipv4h_fragments(ipv4h), ipv4h->ttl, ipv4h->protocol,
 	       ipv4h->checksum);
 
 	printf("src addr: ");
@@ -77,13 +75,12 @@ void pr_tcp_header(const struct tcp_header *tcph)
 	       "dest port: %u\n"
 	       "seq number: %u\n"
 	       "ack number: %u\n"
-	       "data offset: %u\n"
+	       "header size: %u\n"
 	       "flags: %u\n"
 	       "win size: %u\n"
 	       "checksum: %.4x\n"
 	       "urg pointer: %u\n",
 	       tcph->src_port, tcph->dest_port, tcph->seq_number,
-	       tcph->ack_number, tcph->flags_and_data_offset.data_offset,
-	       tcph->flags_and_data_offset.flags, tcph->win_size,
-	       tcph->checksum, tcph->urg_pointer);
+	       tcph->ack_number, tcph_size(tcph), tcph_flags(tcph),
+	       tcph->win_size, tcph->checksum, tcph->urg_pointer);
 }

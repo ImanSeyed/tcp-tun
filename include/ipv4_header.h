@@ -46,6 +46,21 @@ struct [[gnu::packed]] ipv4_header {
 _Static_assert(sizeof(struct ipv4_header) == 20,
 	       "ipv4_header must be 20 bytes.");
 
+static inline u8 ipv4h_size(const struct ipv4_header *ipv4h)
+{
+	return ipv4h->version_and_ihl.ihl * 4;
+}
+
+static inline u16 ipv4h_flags(const struct ipv4_header *ipv4h)
+{
+	return ipv4h->flags_and_fragment.flags;
+}
+
+static inline u16 ipv4h_fragments(const struct ipv4_header *ipv4h)
+{
+	return ipv4h->flags_and_fragment.fragment;
+}
+
 void ipv4h_from_buff(struct ipv4_header *header, const u8 *buffer,
 		     size_t start);
 void init_ipv4h(struct ipv4_header *header, u16 total_length, u8 time_to_live,

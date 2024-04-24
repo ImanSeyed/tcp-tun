@@ -53,6 +53,16 @@ struct [[gnu::packed]] tcp_header {
 
 _Static_assert(sizeof(struct tcp_header) == 20, "tcp_header must be 20 bytes.");
 
+static inline u16 tcph_size(const struct tcp_header *tcph)
+{
+	return tcph->flags_and_data_offset.data_offset * 4;
+}
+
+static inline u16 tcph_flags(const struct tcp_header *tcph)
+{
+	return tcph->flags_and_data_offset.flags;
+}
+
 void tcph_from_buff(struct tcp_header *header, const u8 *buffer, size_t start);
 void init_tcph(struct tcp_header *header, u16 src_port, u16 dest_port,
 	       u16 flags, u32 seq_number, u32 ack_number, u16 win_size);
