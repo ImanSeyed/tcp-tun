@@ -17,7 +17,7 @@ struct addrress_pair {
 	u16 port;
 };
 
-struct connection_quad {
+struct conn_quad {
 	struct addrress_pair src;
 	struct addrress_pair dest;
 };

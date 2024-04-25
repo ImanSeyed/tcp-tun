@@ -39,7 +39,7 @@ void pr_state(enum tcp_state state)
 	printf("%s", STATES_STR[state]);
 }
 
-void pr_quad(struct connection_quad quad)
+void pr_quad(struct conn_quad quad)
 {
 	pr_addr(quad.src.ip, quad.src.port);
 	printf(" -> ");

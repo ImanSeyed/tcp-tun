@@ -5,7 +5,7 @@
 #include "ipv4_header.h"
 #include "tcp_header.h"
 #include "types.h"
-#include "connections.h"
+#include "conn_table.h"
 #include "tun.h"
 #include "states.h"
 
@@ -15,11 +15,11 @@ int main()
 	u8 packet_with_pi[1504];
 	struct ipv4_header incoming_ipv4h;
 	struct tcp_header incoming_tcph;
-	struct connections_hashmap *connections_ht;
+	struct conn_table *conn_tbl;
 	struct TCB starter;
 	struct ifreq ifr = { 0 };
 	nic_fd = tun_open("tun%d", &ifr);
-	connections_ht = connections_create();
+	conn_tbl = init_conn_table();
 
 	union ipv4_addr tun_ipv4, tun_subnet;
 	init_ipv4_addr(&tun_ipv4, 192, 168, 20, 1);
@@ -44,7 +44,7 @@ int main()
 		tcph_from_buff(&incoming_tcph, packet,
 			       ipv4h_size(&incoming_ipv4h));
 
-		struct connection_quad new_quad;
+		struct conn_quad new_quad;
 		new_quad.src.ip = incoming_ipv4h.src_addr;
 		new_quad.dest.ip = incoming_ipv4h.dest_addr;
 		new_quad.src.port = incoming_tcph.src_port;
@@ -54,15 +54,14 @@ int main()
 				  (ipv4h_size(&incoming_ipv4h) +
 				   tcph_size(&incoming_tcph));
 
-		if (connections_entry_is_occupied(connections_ht, &new_quad)) {
+		if (conn_table_is_entry_occupied(conn_tbl, &new_quad)) {
 			on_packet(nic_fd, &incoming_ipv4h, &incoming_tcph,
 				  &starter, packet + data_offset);
 		} else {
 			starter = accept_request(nic_fd, &incoming_ipv4h,
 						 &incoming_tcph);
-			connections_set(connections_ht, &new_quad,
-					starter.state);
-			connections_dump(connections_ht);
+			conn_table_insert(conn_tbl, &new_quad, starter.state);
+			conn_table_dump(conn_tbl);
 			printf("==============================\n");
 			fflush(stdout);
 		}
