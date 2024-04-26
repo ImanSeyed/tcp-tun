@@ -6,18 +6,22 @@
 #include "states.h"
 #include "send.h"
 
+/* From RFC1323:
+ * TCP determines if a data segment is "old" or "new" by testing
+ * whether its sequence number is within 2**31 bytes of the left edge
+ * of the window, and if it is not, discarding the data as "old".  To
+ * insure that new data is never mistakenly considered old and vice-
+ * versa, the left edge of the sender's window has to be at most
+ * 2**31 away from the right edge of the receiver's window.
+ */
+static bool wrapping_lt(u32 lhs, u32 rhs)
+{
+	return (lhs - rhs) > (1 << 31);
+}
+
 static bool is_between_wrapped(u32 start, u32 x, u32 end)
 {
-	if (start == x) {
-		return false;
-	} else if (start < x) {
-		if (end >= start && end <= x)
-			return false;
-	} else if (start > x) {
-		if (!(end < start && end > x))
-			return false;
-	}
-	return true;
+	return wrapping_lt(start, x) && wrapping_lt(x, end);
 }
 
 static bool is_synchronized(const struct TCB *ctrl_block)
