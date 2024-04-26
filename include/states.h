@@ -69,8 +69,6 @@ struct TCB {
 struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 			  struct tcp_header *tcph);
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	       struct TCB *starter, u8 *data);
-bool is_between_wrapped(u32 start, u32 x, u32 end);
-bool is_synchronized(const struct TCB *starter);
+	       struct TCB *ctrl_block, u8 *data);
 
 #endif

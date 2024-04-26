@@ -16,7 +16,7 @@ int main()
 	struct ipv4_header incoming_ipv4h;
 	struct tcp_header incoming_tcph;
 	struct conn_table *conn_tbl;
-	struct TCB starter;
+	struct TCB ctrl_block;
 	struct ifreq ifr = { 0 };
 	nic_fd = tun_open("tun%d", &ifr);
 	conn_tbl = init_conn_table();
@@ -56,11 +56,12 @@ int main()
 
 		if (conn_table_is_entry_occupied(conn_tbl, &new_quad)) {
 			on_packet(nic_fd, &incoming_ipv4h, &incoming_tcph,
-				  &starter, packet + data_offset);
+				  &ctrl_block, packet + data_offset);
 		} else {
-			starter = accept_request(nic_fd, &incoming_ipv4h,
-						 &incoming_tcph);
-			conn_table_insert(conn_tbl, &new_quad, starter.state);
+			ctrl_block = accept_request(nic_fd, &incoming_ipv4h,
+						    &incoming_tcph);
+			conn_table_insert(conn_tbl, &new_quad,
+					  ctrl_block.state);
 			conn_table_dump(conn_tbl);
 			printf("==============================\n");
 			fflush(stdout);

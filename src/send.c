@@ -41,27 +41,27 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 }
 
 void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	      struct TCB *starter)
+	      struct TCB *ctrl_block)
 {
 	struct ipv4_header rst_ipv4h;
 	struct tcp_header rst_tcph;
 	/* write out the headers */
 	/* TODO: fix sequence numbers */
 	init_tcph(&rst_tcph, tcph->dest_port, tcph->src_port, RST, 0, 0,
-		  starter->send.wnd);
+		  ctrl_block->send.wnd);
 	init_ipv4h(&rst_ipv4h, 20 + tcph_size(&rst_tcph), 64, TCP_PROTO,
 		   ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &rst_ipv4h, &rst_tcph, NULL);
 }
 
 void send_fin(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	      struct TCB *starter)
+	      struct TCB *ctrl_block)
 {
 	struct ipv4_header fin_ipv4h;
 	struct tcp_header fin_tcph;
 	/* write out the headers */
 	init_tcph(&fin_tcph, tcph->dest_port, tcph->src_port, FIN,
-		  starter->send.nxt, 0, starter->send.wnd);
+		  ctrl_block->send.nxt, 0, ctrl_block->send.wnd);
 	init_ipv4h(&fin_ipv4h, 20 + tcph_size(&fin_tcph), 64, TCP_PROTO,
 		   ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &fin_ipv4h, &fin_tcph, NULL);

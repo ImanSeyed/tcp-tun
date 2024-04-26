@@ -8,8 +8,8 @@
 void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		 u8 *buffer);
 void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	      struct TCB *starter);
+	      struct TCB *ctrl_block);
 void send_fin(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	      struct TCB *starter);
+	      struct TCB *ctrl_block);
 
 #endif
