@@ -66,8 +66,8 @@ struct TCB {
 	struct recv_sequence_space recv;
 };
 
-struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
-			  struct tcp_header *tcph);
+struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
+			   struct tcp_header *tcph);
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	       struct TCB *ctrl_block, u8 *data);
 

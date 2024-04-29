@@ -33,12 +33,12 @@ u32 hash_func(const struct conn_quad *quad)
 }
 
 struct conn_table_entry *init_conn_table_entry(struct conn_quad *key,
-					       enum tcp_state value)
+					       struct TCB *value)
 {
 	struct conn_table_entry *entry =
 		malloc(sizeof(struct conn_table_entry));
 	entry->quad = *key;
-	entry->state = value;
+	entry->ctrl_block = value;
 	entry->next = NULL;
 	return entry;
 }
@@ -55,7 +55,7 @@ struct conn_table *init_conn_table(void)
 }
 
 void conn_table_insert(struct conn_table *table, struct conn_quad *key,
-		       enum tcp_state value)
+		       struct TCB *value)
 {
 	u32 slot = hash_func(key);
 	struct conn_table_entry *entry = table->entries[slot];
@@ -69,7 +69,7 @@ void conn_table_insert(struct conn_table *table, struct conn_quad *key,
 
 	while (entry != NULL) {
 		if (memcmp(&entry->quad, key, sizeof(struct conn_quad)) == 0) {
-			entry->state = value;
+			entry->ctrl_block = value;
 			return;
 		}
 		prev = entry;
@@ -78,14 +78,14 @@ void conn_table_insert(struct conn_table *table, struct conn_quad *key,
 	prev->next = init_conn_table_entry(key, value);
 }
 
-enum tcp_state *conn_table_get(const struct conn_table *table,
-			       const struct conn_quad *key)
+struct TCB *conn_table_get(const struct conn_table *table,
+			   const struct conn_quad *key)
 {
 	u32 slot = hash_func(key);
 	struct conn_table_entry *entry = table->entries[slot];
 	while (entry != NULL) {
 		if (memcmp(&entry->quad, key, sizeof(struct conn_quad)) == 0)
-			return &entry->state;
+			return entry->ctrl_block;
 		entry = entry->next;
 	}
 	return NULL;
@@ -102,6 +102,7 @@ void conn_table_remove(struct conn_table *table, struct conn_quad *key)
 	struct conn_table_entry *prev;
 	int index = 0;
 
+	free(entry->ctrl_block);
 	while (entry != NULL) {
 		if (memcmp(&entry->quad, key, sizeof(struct conn_quad)) == 0) {
 			/* first item and no next entry */
@@ -141,7 +142,7 @@ void conn_table_dump(const struct conn_table *table)
 		do {
 			pr_quad(entry->quad);
 			printf(" => ");
-			pr_state(entry->state);
+			pr_state(entry->ctrl_block->state);
 			printf(" ");
 			entry = entry->next;
 		} while (entry != NULL);

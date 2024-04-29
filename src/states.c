@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "ipv4_header.h"
 #include "tcp_header.h"
@@ -29,29 +30,30 @@ static bool is_synchronized(const struct TCB *ctrl_block)
 	return (ctrl_block->state == SYNRECVD) ? false : true;
 }
 
-struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
-			  struct tcp_header *tcph)
+struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
+			   struct tcp_header *tcph)
 {
-	struct TCB ctrl_block = {
+	struct TCB *ctrl_block = malloc(sizeof(struct TCB));
+	*ctrl_block = (struct TCB) {
 		.state = SYNRECVD,
 		.send = {
-                        .iss = 0,
-                        .una = tcph->seq_number,
-                        .nxt = ctrl_block.send.una + 1,
-                        .wnd = 10,
-                        .up = false,
-                        .wl1 = 0,
-                        .wl2 = 0,
-                },
+			.iss = 0,
+			.una = tcph->seq_number,
+			.nxt = ctrl_block->send.una + 1,
+			.wnd = 10,
+			.up = false,
+			.wl1 = 0,
+			.wl2 = 0,
+		},
 		.recv = {
-                        .irs = tcph->seq_number,
-                        .nxt = tcph->seq_number + 1,
-                        .wnd = tcph->win_size,
-                        .up = false,
-                },
+			.irs = tcph->seq_number,
+			.nxt = tcph->seq_number + 1,
+			.wnd = tcph->win_size,
+			.up = false,
+		},
 	};
 
-	ctrl_block.send.nxt = ctrl_block.send.iss;
+	ctrl_block->send.nxt = ctrl_block->send.iss;
 
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
@@ -60,11 +62,11 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 
 	/* write out the headers */
 	init_tcph(&syn_ack, tcph->dest_port, tcph->src_port, SYN | ACK,
-		  ctrl_block.send.iss, tcph->seq_number + 1,
-		  ctrl_block.send.wnd);
+		  ctrl_block->send.iss, tcph->seq_number + 1,
+		  ctrl_block->send.wnd);
 	init_ipv4h(&ip, 20 + tcph_size(&syn_ack), 64, TCP_PROTO,
 		   ipv4h->dest_addr, ipv4h->src_addr);
-	send_packet(nic_fd, &ip, &syn_ack, buffer, &ctrl_block);
+	send_packet(nic_fd, &ip, &syn_ack, buffer, ctrl_block);
 	return ctrl_block;
 }
 

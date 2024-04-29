@@ -16,7 +16,6 @@ int main()
 	struct ipv4_header incoming_ipv4h;
 	struct tcp_header incoming_tcph;
 	struct conn_table *conn_tbl;
-	struct TCB ctrl_block;
 	struct ifreq ifr = { 0 };
 	nic_fd = tun_open("tun%d", &ifr);
 	conn_tbl = init_conn_table();
@@ -44,24 +43,26 @@ int main()
 		tcph_from_buff(&incoming_tcph, packet,
 			       ipv4h_size(&incoming_ipv4h));
 
-		struct conn_quad new_quad;
-		new_quad.src.ip = incoming_ipv4h.src_addr;
-		new_quad.dest.ip = incoming_ipv4h.dest_addr;
-		new_quad.src.port = incoming_tcph.src_port;
-		new_quad.dest.port = incoming_tcph.dest_port;
+		struct conn_quad new_quad = {
+			.src.ip = incoming_ipv4h.src_addr,
+			.dest.ip = incoming_ipv4h.dest_addr,
+			.src.port = incoming_tcph.src_port,
+			.dest.port = incoming_tcph.dest_port,
+		};
 
 		u16 data_offset = incoming_ipv4h.total_length -
 				  (ipv4h_size(&incoming_ipv4h) +
 				   tcph_size(&incoming_tcph));
 
 		if (conn_table_is_entry_occupied(conn_tbl, &new_quad)) {
+			struct TCB *ctrl_block =
+				conn_table_get(conn_tbl, &new_quad);
 			on_packet(nic_fd, &incoming_ipv4h, &incoming_tcph,
-				  &ctrl_block, packet + data_offset);
+				  ctrl_block, packet + data_offset);
 		} else {
-			ctrl_block = accept_request(nic_fd, &incoming_ipv4h,
-						    &incoming_tcph);
-			conn_table_insert(conn_tbl, &new_quad,
-					  ctrl_block.state);
+			struct TCB *new_ctrl_block = accept_request(
+				nic_fd, &incoming_ipv4h, &incoming_tcph);
+			conn_table_insert(conn_tbl, &new_quad, new_ctrl_block);
 			conn_table_dump(conn_tbl);
 			printf("==============================\n");
 			fflush(stdout);
