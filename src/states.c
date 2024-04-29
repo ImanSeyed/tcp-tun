@@ -36,7 +36,7 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 		.state = SYNRECVD,
 		.send = {
                         .iss = 0,
-                        .una = ctrl_block.send.iss,
+                        .una = tcph->seq_number,
                         .nxt = ctrl_block.send.una + 1,
                         .wnd = 10,
                         .up = false,
@@ -51,7 +51,6 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
                 },
 	};
 
-	ctrl_block.send.una = ctrl_block.send.iss;
 	ctrl_block.send.nxt = ctrl_block.send.iss;
 
 	/* start establishing a connection */
@@ -65,8 +64,7 @@ struct TCB accept_request(int nic_fd, struct ipv4_header *ipv4h,
 		  ctrl_block.send.wnd);
 	init_ipv4h(&ip, 20 + tcph_size(&syn_ack), 64, TCP_PROTO,
 		   ipv4h->dest_addr, ipv4h->src_addr);
-	send_packet(nic_fd, &ip, &syn_ack, buffer);
-
+	send_packet(nic_fd, &ip, &syn_ack, buffer, &ctrl_block);
 	return ctrl_block;
 }
 
@@ -120,42 +118,26 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		return;
 	}
 
-	/* acceptable ACK check (SND.UNA < SEG.ACK =< SND.NXT) */
-	/* TODO: handle synchronized RST */
-	if (!is_between_wrapped(ctrl_block->send.una, tcph->ack_number,
-				ctrl_block->send.nxt + 1)) {
-		if (!is_synchronized(ctrl_block)) {
-			/* according to the Reset Generation, we should send RST */
-			send_rst(nic_fd, ipv4h, tcph, ctrl_block);
-		}
-		return;
-	}
-
-	ctrl_block->send.una = tcph->ack_number;
-
 	ctrl_block->recv.nxt = tcph->seq_number + segment_len;
-	/* TODO: make sure this get ACKed */
 
 	switch (ctrl_block->state) {
 	case SYNRECVD:
 		/* expect to get an ACK for our SYN-ACK */
 		if (!(flags & ACK))
 			return;
-		/* must have ACKed our SYN, since we detected at least one ACKed
-		 * byte, and we have only sent one byte (the SYN)
-		 * */
+
 		ctrl_block->state = ESTAB;
-		/* now let's terminate the connection */
-		/* TODO: needs to be stored in the retransmission queue */
-		send_fin(nic_fd, ipv4h, tcph, ctrl_block);
+	case ESTAB:
+		/* terminate the connection immediately */
+		send_fin_ack(nic_fd, ipv4h, tcph, ctrl_block);
 		ctrl_block->state = FINWAIT1;
 		break;
-	case ESTAB:
-		/* UNIMPLEMENTED */
 	case FINWAIT1:
 		if (!(flags & FIN)) {
 			/* UNIMPLEMENTED */
+			break;
 		}
+		send_rst(nic_fd, ipv4h, tcph, ctrl_block);
 		/* must send ACKed our FIN, since we detected at least one ACKed
 		 * byte, and we have only sent one byte (the FIN)
 		 * */
