@@ -58,7 +58,6 @@ struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
 	struct ipv4_header ip;
-	u8 buffer[1500];
 
 	/* write out the headers */
 	init_tcph(&syn_ack, tcph->dest_port, tcph->src_port, SYN | ACK,
@@ -66,7 +65,7 @@ struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
 		  ctrl_block->send.wnd);
 	init_ipv4h(&ip, 20 + tcph_size(&syn_ack), 64, TCP_PROTO,
 		   ipv4h->dest_addr, ipv4h->src_addr);
-	send_packet(nic_fd, &ip, &syn_ack, buffer, ctrl_block);
+	send_packet(nic_fd, &ip, &syn_ack, NULL, ctrl_block);
 	return ctrl_block;
 }
 
