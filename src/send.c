@@ -27,8 +27,9 @@ void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	tcph_ptr = packet + ipv4h_len;
 
 	u16 flags = tcph_flags(tcph);
-	if (flags & SYN)
-		ctrl_block->send.nxt++;
+	/* FIXME: this doesn't seem right at all? */
+	//	if (flags & SYN)
+	//		ctrl_block->send.nxt++;
 
 	if (flags & FIN)
 		ctrl_block->send.nxt++;
@@ -67,7 +68,7 @@ void send_fin_ack(int nic_fd, struct ipv4_header *ipv4h,
 	struct tcp_header fin_tcph;
 	/* write out the headers */
 	init_tcph(&fin_tcph, tcph->dest_port, tcph->src_port, FIN | ACK,
-		  ctrl_block->send.nxt, ctrl_block->send.una,
+		  ctrl_block->send.nxt, ctrl_block->recv.nxt,
 		  ctrl_block->send.wnd);
 	init_ipv4h(&fin_ipv4h, 20 + tcph_size(&fin_tcph), 64, TCP_PROTO,
 		   ipv4h->dest_addr, ipv4h->src_addr);

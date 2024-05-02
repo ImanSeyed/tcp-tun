@@ -38,8 +38,8 @@ struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
 		.state = SYNRECVD,
 		.send = {
 			.iss = 0,
-			.una = tcph->seq_number,
-			.nxt = ctrl_block->send.una + 1,
+			.una = 0,
+			.nxt = ctrl_block->send.iss + 1,
 			.wnd = 10,
 			.up = false,
 			.wl1 = 0,
@@ -52,8 +52,6 @@ struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
 			.up = false,
 		},
 	};
-
-	ctrl_block->send.nxt = ctrl_block->send.iss;
 
 	/* start establishing a connection */
 	struct tcp_header syn_ack;
@@ -119,7 +117,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		return;
 	}
 
-	ctrl_block->recv.nxt = tcph->seq_number + segment_len;
+	ctrl_block->recv.nxt = tcph->seq_number + data_len;
 
 	switch (ctrl_block->state) {
 	case SYNRECVD:
@@ -127,8 +125,13 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		if (!(flags & ACK))
 			return;
 
-		ctrl_block->state = ESTAB;
+		if (is_between_wrapped(ctrl_block->send.una - 1,
+				       tcph->ack_number,
+				       ctrl_block->send.nxt + 1))
+			ctrl_block->state = ESTAB;
 	case ESTAB:
+		ctrl_block->send.una = tcph->ack_number;
+
 		/* terminate the connection immediately */
 		send_fin_ack(nic_fd, ipv4h, tcph, ctrl_block);
 		ctrl_block->state = FINWAIT1;
