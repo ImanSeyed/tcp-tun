@@ -71,8 +71,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	       struct TCB *ctrl_block, u8 *data)
 {
 	/* first, check that sequence numbers are valid (RFC 793 S3.3) */
-	u16 data_len =
-		ipv4h->total_length - (ipv4h_size(ipv4h) + tcph_size(tcph));
+	u16 data_len = data_size(ipv4h, tcph);
 	u16 flags = tcph_flags(tcph);
 
 	if (flags & FIN)

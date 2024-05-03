@@ -63,6 +63,12 @@ static inline u16 tcph_flags(const struct tcp_header *tcph)
 	return tcph->flags_and_data_offset.flags;
 }
 
+static inline u16 data_size(const struct ipv4_header *ipv4h,
+			    const struct tcp_header *tcph)
+{
+	return ipv4h->total_length - (ipv4h_size(ipv4h) + tcph_size(tcph));
+}
+
 void tcph_from_buff(struct tcp_header *header, const u8 *buffer, size_t start);
 void init_tcph(struct tcp_header *header, u16 src_port, u16 dest_port,
 	       u16 flags, u32 seq_number, u32 ack_number, u16 win_size);

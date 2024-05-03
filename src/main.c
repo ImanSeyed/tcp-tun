@@ -50,15 +50,13 @@ int main()
 			.dest.port = incoming_tcph.dest_port,
 		};
 
-		u16 data_offset = incoming_ipv4h.total_length -
-				  (ipv4h_size(&incoming_ipv4h) +
-				   tcph_size(&incoming_tcph));
+		u16 data_len = data_size(&incoming_ipv4h, &incoming_tcph);
 
 		if (conn_table_is_entry_occupied(conn_tbl, &new_quad)) {
 			struct TCB *ctrl_block =
 				conn_table_get(conn_tbl, &new_quad);
 			on_packet(nic_fd, &incoming_ipv4h, &incoming_tcph,
-				  ctrl_block, packet + data_offset);
+				  ctrl_block, packet + data_len);
 		} else {
 			struct TCB *new_ctrl_block = accept_request(
 				nic_fd, &incoming_ipv4h, &incoming_tcph);
