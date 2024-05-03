@@ -27,7 +27,6 @@ struct TCB *conn_table_get(const struct conn_table *hashmap,
 			   const struct conn_quad *key);
 void conn_table_remove(struct conn_table *hashmap, struct conn_quad *key);
 void conn_table_dump(const struct conn_table *table);
-bool conn_table_is_entry_occupied(struct conn_table *table,
-				  struct conn_quad *key);
+bool conn_table_key_exist(struct conn_table *table, struct conn_quad *key);
 
 #endif

@@ -52,7 +52,7 @@ int main()
 
 		u16 data_len = data_size(&incoming_ipv4h, &incoming_tcph);
 
-		if (conn_table_is_entry_occupied(conn_tbl, &new_quad)) {
+		if (conn_table_key_exist(conn_tbl, &new_quad)) {
 			struct TCB *ctrl_block =
 				conn_table_get(conn_tbl, &new_quad);
 			on_packet(nic_fd, &incoming_ipv4h, &incoming_tcph,

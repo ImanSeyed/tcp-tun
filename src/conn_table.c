@@ -151,15 +151,7 @@ void conn_table_dump(const struct conn_table *table)
 	}
 }
 
-bool conn_table_is_entry_occupied(struct conn_table *table,
-				  struct conn_quad *key)
+bool conn_table_key_exist(struct conn_table *table, struct conn_quad *key)
 {
-	u32 slot = hash_func(key);
-	struct conn_table_entry *entry = table->entries[slot];
-	if (entry == NULL)
-		goto notfound;
-	if (!memcmp(&entry->quad, key, sizeof(struct conn_quad)))
-		return true;
-notfound:
-	return false;
+	return (conn_table_get(table, key) != NULL) ? true : false;
 }
