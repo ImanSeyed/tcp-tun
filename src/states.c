@@ -71,16 +71,16 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	       struct TCB *ctrl_block, u8 *data)
 {
 	/* first, check that sequence numbers are valid (RFC 793 S3.3) */
-	u32 segment_len = tcph_size(tcph);
-	u16 data_len = ipv4h->total_length - (ipv4h_size(ipv4h) + segment_len);
+	u16 data_len =
+		ipv4h->total_length - (ipv4h_size(ipv4h) + tcph_size(tcph));
 	u16 flags = tcph_flags(tcph);
 
 	if (flags & FIN)
-		++segment_len;
+		++data_len;
 	if (flags & SYN)
-		++segment_len;
+		++data_len;
 
-	if (segment_len == 0) {
+	if (data_len == 0) {
 		/* zero-length segment has separate rules for acceptance */
 		if (ctrl_block->recv.wnd == 0) {
 			if (tcph->seq_number != ctrl_block->recv.nxt)
@@ -103,7 +103,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 				 ctrl_block->recv.nxt - 1, tcph->seq_number,
 				 ctrl_block->recv.nxt + ctrl_block->recv.wnd) &&
 			 !is_between_wrapped(ctrl_block->recv.nxt - 1,
-					     tcph->seq_number + segment_len - 1,
+					     tcph->seq_number + data_len - 1,
 					     ctrl_block->recv.nxt +
 						     ctrl_block->recv.wnd))
 			return;
