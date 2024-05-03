@@ -1,12 +1,12 @@
-#ifndef __TCP_TUN_IPV4_HEADER_H__
-#define __TCP_TUN_IPV4_HEADER_H__
+#pragma once
 
 #include "ipv4_addr.h"
 #include "types.h"
 
 #define IPV4_PROTO 0x08
+#define IHL_MINIMUM_SIZE 5
 
-// offset of each field in the IPv4 header
+/* offset of each field in the IPv4 header */
 #define VERSION_OFF 0
 #define TOS_OFF 1
 #define LENGTH_OFF 2
@@ -61,12 +61,9 @@ static inline u16 ipv4h_fragments(const struct ipv4_header *ipv4h)
 	return ipv4h->flags_and_fragment.fragment;
 }
 
-void ipv4h_from_buff(struct ipv4_header *header, const u8 *buffer,
-		     size_t start);
-void init_ipv4h(struct ipv4_header *header, u16 total_length, u8 time_to_live,
+void ipv4h_from_buff(struct ipv4_header *ipv4h, const u8 *buffer, size_t start);
+void init_ipv4h(struct ipv4_header *ipv4h, u16 total_length, u8 time_to_live,
 		u8 protocol, union ipv4_addr src_addr,
 		union ipv4_addr dest_addr);
-void ipv4h_to_buff(const struct ipv4_header *header, u8 *buffer, size_t start);
+void ipv4h_to_buff(const struct ipv4_header *ipv4h, u8 *buffer, size_t start);
 u16 ipv4h_checksum(const u8 *ipv4_ptr, size_t len);
-
-#endif

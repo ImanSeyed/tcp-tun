@@ -1,5 +1,5 @@
-#ifndef __TCP_TUN_CONNECTIONS_H__
-#define __TCP_TUN_CONNECTIONS_H__
+#pragma once
+
 #include <stdbool.h>
 #include "ipv4_addr.h"
 #include "states.h"
@@ -28,5 +28,3 @@ struct TCB *conn_table_get(const struct conn_table *hashmap,
 void conn_table_remove(struct conn_table *hashmap, struct conn_quad *key);
 void conn_table_dump(const struct conn_table *table);
 bool conn_table_key_exist(struct conn_table *table, struct conn_quad *key);
-
-#endif

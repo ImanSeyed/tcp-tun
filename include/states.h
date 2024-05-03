@@ -1,5 +1,5 @@
-#ifndef __TCP_TUN_STATES_H__
-#define __TCP_TUN_STATES_H__
+#pragma once
+
 #include <stdbool.h>
 #include "ipv4_header.h"
 #include "tcp_header.h"
@@ -18,7 +18,8 @@ enum tcp_state {
 #undef ENUMERATE_STATES_IMPL
 };
 
-/*  Send Sequence Space (RFC 793 S3.2 Figure 4)
+/*  
+ *  Send Sequence Space (RFC 793 S3.2 Figure 4)
  *
  *             1         2          3          4
  *        ----------|----------|----------|----------
@@ -29,7 +30,7 @@ enum tcp_state {
  *  2 - sequence numbers of unacknowledged data
  *  3 - sequence numbers allowed for new data transmission
  *  4 - future sequence numbers which are not yet allowed
- *  */
+ */
 
 struct send_sequence_space {
 	u32 una; /* send unacknowledged */
@@ -41,7 +42,8 @@ struct send_sequence_space {
 	u32 iss; /* initial send sequence number */
 };
 
-/*  Receive Sequence Space (RFC 793 S3.2 Figure 5)
+/*  
+ *  Receive Sequence Space (RFC 793 S3.2 Figure 5)
  *
  *            1          2          3
  *        ----------|----------|----------
@@ -51,7 +53,7 @@ struct send_sequence_space {
  *   1 - old sequence numbers which have been acknowledged
  *   2 - sequence numbers allowed for new reception
  *   3 - future sequence numbers which are not yet allowed
- * */
+ */
 
 struct recv_sequence_space {
 	u32 nxt; /* receive next */
@@ -70,5 +72,3 @@ struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
 			   struct tcp_header *tcph);
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	       struct TCB *ctrl_block, u8 *data);
-
-#endif

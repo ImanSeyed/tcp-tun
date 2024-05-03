@@ -1,5 +1,5 @@
-#ifndef __TCP_TUN_IN_CKSUM_H__
-#define __TCP_TUN_IN_CKSUM_H__
+#pragma once
+
 #include "types.h"
 
 #define ADDCARRY(x)                   \
@@ -15,5 +15,3 @@
 	}
 
 u16 in_cksum(const struct cksum_vec *vec, int veclen);
-
-#endif

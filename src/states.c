@@ -7,7 +7,8 @@
 #include "states.h"
 #include "send.h"
 
-/* From RFC1323:
+/* 
+ * From RFC1323:
  * TCP determines if a data segment is "old" or "new" by testing
  * whether its sequence number is within 2**31 bytes of the left edge
  * of the window, and if it is not, discarding the data as "old".  To
@@ -17,7 +18,7 @@
  */
 static bool wrapping_lt(u32 lhs, u32 rhs)
 {
-	return (lhs - rhs) > (1 << 31);
+	return (lhs - rhs) > (1u << 31);
 }
 
 static bool is_between_wrapped(u32 start, u32 x, u32 end)
@@ -25,21 +26,19 @@ static bool is_between_wrapped(u32 start, u32 x, u32 end)
 	return wrapping_lt(start, x) && wrapping_lt(x, end);
 }
 
-static bool is_synchronized(const struct TCB *ctrl_block)
-{
-	return (ctrl_block->state == SYNRECVD) ? false : true;
-}
-
 struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
 			   struct tcp_header *tcph)
 {
+	struct tcp_header syn_ack;
+	struct ipv4_header ip;
 	struct TCB *ctrl_block = malloc(sizeof(struct TCB));
-	*ctrl_block = (struct TCB) {
+
+	*ctrl_block = (struct TCB){
 		.state = SYNRECVD,
 		.send = {
 			.iss = 0,
 			.una = 0,
-			.nxt = ctrl_block->send.iss + 1,
+			.nxt = 0,
 			.wnd = 10,
 			.up = false,
 			.wl1 = 0,
@@ -53,24 +52,21 @@ struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
 		},
 	};
 
-	/* start establishing a connection */
-	struct tcp_header syn_ack;
-	struct ipv4_header ip;
+	ctrl_block->send.nxt = ctrl_block->send.iss + 1;
 
-	/* write out the headers */
 	init_tcph(&syn_ack, tcph->dest_port, tcph->src_port, SYN | ACK,
 		  ctrl_block->send.iss, tcph->seq_number + 1,
 		  ctrl_block->send.wnd);
 	init_ipv4h(&ip, 20 + tcph_size(&syn_ack), 64, TCP_PROTO,
 		   ipv4h->dest_addr, ipv4h->src_addr);
 	send_packet(nic_fd, &ip, &syn_ack, NULL, ctrl_block);
+
 	return ctrl_block;
 }
 
 void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	       struct TCB *ctrl_block, u8 *data)
 {
-	/* first, check that sequence numbers are valid (RFC 793 S3.3) */
 	u16 data_len = data_size(ipv4h, tcph);
 	u16 flags = tcph_flags(tcph);
 
@@ -94,10 +90,11 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 	} else {
 		if (ctrl_block->recv.wnd == 0)
 			return;
-		/* valid segment check:
+		/* 
+                 * valid segment check:
 		 * RCV.NXT =< SEG.SEQ < RCV.NXT + RCV.WND) ||
 		 * RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND
-		 * */
+		 */
 		else if (!is_between_wrapped(
 				 ctrl_block->recv.nxt - 1, tcph->seq_number,
 				 ctrl_block->recv.nxt + ctrl_block->recv.wnd) &&
@@ -128,6 +125,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 				       tcph->ack_number,
 				       ctrl_block->send.nxt + 1))
 			ctrl_block->state = ESTAB;
+		/* fall through */
 	case ESTAB:
 		ctrl_block->send.una = tcph->ack_number;
 
@@ -141,24 +139,23 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 			break;
 		}
 		send_rst(nic_fd, ipv4h, tcph, ctrl_block);
-		/* must send ACKed our FIN, since we detected at least one ACKed
+		/* 
+                 * must send ACKed our FIN, since we detected at least one ACKed
 		 * byte, and we have only sent one byte (the FIN)
-		 * */
+                 */
 		ctrl_block->state = FINWAIT2;
 		break;
 	case FINWAIT2:
 		if (!(flags & FIN)) {
-			/* unimplemented */
+			/* UNIMPLEMENTED */
 		}
-		/* must send ACKed our FIN, since we detected at least one ACKed
+		/* 
+                 * must send ACKed our FIN, since we detected at least one ACKed
 		 * byte, and we have only sent one byte (the FIN)
-		 * */
+                 */
 		ctrl_block->state = CLOSING;
 		break;
 	case CLOSING:
 		break;
-	default:
-		/* MUST NOT be another case */
-		assert(false);
 	}
 }

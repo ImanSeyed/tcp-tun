@@ -1,5 +1,5 @@
-#ifndef __TCP_TUN_IPV4_ADDR_H__
-#define __TCP_TUN_IPV4_ADDR_H__
+#pragma once
+
 #include "types.h"
 
 union ipv4_addr {
@@ -24,5 +24,3 @@ struct conn_quad {
 
 void init_ipv4_addr(union ipv4_addr *addr, u8 a, u8 b, u8 c, u8 d);
 char *ipv4_addr_to_str(union ipv4_addr *addr);
-
-#endif

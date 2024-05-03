@@ -1,5 +1,4 @@
-#ifndef __TCP_TUN_TCP_HEADER_H__
-#define __TCP_TUN_TCP_HEADER_H__
+#pragma once
 
 #include "types.h"
 #include "ipv4_header.h"
@@ -8,7 +7,7 @@
 #define PSEUDO_HEADER_SIZE 12
 #define TCP_MINIMUM_DATA_OFFSET 5
 
-// offset of each field in the TCP header
+/* offset of each field in the TCP header */
 #define SRC_PORT_OFF 0
 #define DST_PORT_OFF 2
 #define SEQ_NUM_OFF 4
@@ -18,7 +17,7 @@
 #define TCP_CHECKSUM_OFF 16
 #define URG_PTR_OFF 18
 
-// offset of each field in the pseudo header
+/* offset of each field in the pseudo header */
 #define P_SRC_ADDR_OFF 0
 #define P_DST_ADDR_OFF 4
 #define P_PROTO_OFF 9
@@ -69,11 +68,9 @@ static inline u16 data_size(const struct ipv4_header *ipv4h,
 	return ipv4h->total_length - (ipv4h_size(ipv4h) + tcph_size(tcph));
 }
 
-void tcph_from_buff(struct tcp_header *header, const u8 *buffer, size_t start);
-void init_tcph(struct tcp_header *header, u16 src_port, u16 dest_port,
-	       u16 flags, u32 seq_number, u32 ack_number, u16 win_size);
-void tcph_to_buff(const struct tcp_header *header, u8 *buffer, size_t start);
+void tcph_from_buff(struct tcp_header *tcph, const u8 *buffer, size_t start);
+void init_tcph(struct tcp_header *tcph, u16 src_port, u16 dest_port, u16 flags,
+	       u32 seq_number, u32 ack_number, u16 win_size);
+void tcph_to_buff(const struct tcp_header *tcph, u8 *buffer, size_t start);
 u16 tcph_checksum(const u8 *tcph_buff, size_t len, const u8 *pseudo_header);
 u8 *get_pseudo_header(const struct ipv4_header *header);
-
-#endif

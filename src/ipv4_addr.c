@@ -15,6 +15,7 @@ char *ipv4_addr_to_str(union ipv4_addr *addr)
 
 	sprintf(ipv4_addr_str, "%u.%u.%u.%u", addr->first, addr->second,
 		addr->third, addr->fourth);
+
 	return ipv4_addr_str;
 }
 

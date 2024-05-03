@@ -1,5 +1,5 @@
-#ifndef __TCP_TUN_TYPES_H__
-#define __TCP_TUN_TYPES_H__
+#pragma once
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -18,5 +18,3 @@ struct cksum_vec {
 	const u8 *ptr;
 	size_t len;
 };
-
-#endif

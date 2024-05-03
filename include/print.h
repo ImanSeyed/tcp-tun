@@ -1,5 +1,5 @@
-#ifndef __TCP_TUN_PRINT_H__
-#define __TCP_TUN_PRINT_H__
+#pragma once
+
 #include <sys/types.h>
 #include "types.h"
 #include "tcp_header.h"
@@ -14,5 +14,3 @@ void pr_state(enum tcp_state state);
 void pr_quad(struct conn_quad quad);
 void pr_ipv4_header(const struct ipv4_header *ipv4h);
 void pr_tcp_header(const struct tcp_header *tcph);
-
-#endif
