@@ -1,16 +1,11 @@
 #!/bin/bash
-ROOTER=doas
-if ! command -v doas &> /dev/null; then
-        ROOTER=sudo
-fi
 
-if [ ! -d build ]; then
-        mkdir build
-fi
+ROOTER=sudo
 
-cmake -Bbuild/ -S. && make -j$(nproc) -C build/ && cd build/ || exit 1
-$ROOTER setcap cap_net_admin=eip ./tcp-tun || exit 1
-./tcp-tun &
+set -x
+cmake -Bbuild/ && make -j$(nproc) -C build/ || exit 1
+$ROOTER setcap cap_net_admin=eip build/tcp-tun || exit 1
+build/tcp-tun &
 pid=$!
-trap "kill $pid && cd .." INT
+trap "kill $pid" INT
 wait $pid
