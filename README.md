@@ -1,16 +1,16 @@
 ## Description
 
-This repository is a learning experience in implementing TCP with C language. In order not to get bothered by the Linux kernel TCP implementation, it's over a `tun` interface.
+This repository is a learning experience in implementing TCP stack in userspace via a `tun` interface.
 
-## How To Run It
+## How to Run it
 
-You just need to run `secure_run.sh` with bash:
+ To build and execute the project, run `secure_run.sh` with bash:
 
 ```bash
 $ bash secure_run.sh
 ```
 
-You can use `nc` to make a connection with the program.
+To establish a connection, run `nc` as below:
 
 ```bash
 $ nc 192.168.20.10 123
@@ -18,9 +18,9 @@ $ nc 192.168.20.10 123
 
 ## Warning
 
-Don't mess with the routing table if you don't know what you're doing, otherwise your connection to the Internet may get lost. This program is under development and it's not a complete TCP stack implementation, therefore just test it on a `tun` device without changing your routing table.
+Don't use this project as an inbound yet; otherwise, your Internet connection will get lost. This project is under development and it's not a complete TCP stack implementation, therefore just test it without changing your routing table.
 
-## Standards
+## RFCs
 
 - [RFC 791](https://datatracker.ietf.org/doc/html/rfc791) (IPv4)
 - [RFC 793](https://datatracker.ietf.org/doc/html/rfc793) (TCP)
