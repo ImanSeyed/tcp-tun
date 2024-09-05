@@ -14,10 +14,12 @@
 int tun_open(char *devname, struct ifreq *ifr)
 {
 	int nic_fd;
+
 	if ((nic_fd = open("/dev/net/tun", O_RDWR)) == -1) {
 		perror("open /dev/net/tun");
 		exit(EXIT_FAILURE);
 	}
+
 	ifr->ifr_flags = IFF_TUN;
 	strncpy(ifr->ifr_name, devname, IFNAMSIZ);
 
@@ -26,6 +28,7 @@ int tun_open(char *devname, struct ifreq *ifr)
 		close(nic_fd);
 		exit(EXIT_FAILURE);
 	}
+
 	return nic_fd;
 }
 
@@ -33,38 +36,51 @@ int tun_set_ip(int nic_fd, struct ifreq *ifr, union ipv4_addr *ip_addr,
 	       union ipv4_addr *subnet)
 {
 	assert(nic_fd != -1 && ip_addr != NULL && ip_addr->byte_value != 0);
-	ipv4_addr_to_str(ip_addr);
 
-	int ret = 0;
-	int sockfd = -1;
-	struct sockaddr_in *addr = (struct sockaddr_in *)&ifr->ifr_addr;
+	int ret;
+	int sockfd;
+	struct sockaddr_in *addr;
+	char *ipv4_addr_str;
+	char *ipv4_subnet_str;
+
+	ret = 0;
+	sockfd = -1;
+	addr = (struct sockaddr_in *)&ifr->ifr_addr;
 	ifr->ifr_addr.sa_family = AF_INET;
-	char *ipv4_addr_str = ipv4_addr_to_str(ip_addr);
-	char *ipv4_subnet_str = ipv4_addr_to_str(subnet);
+	ipv4_addr_str = ipv4_addr_to_str(ip_addr);
+	ipv4_subnet_str = ipv4_addr_to_str(subnet);
 
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-		goto out_failure;
+		goto failed;
 
 	inet_pton(AF_INET, ipv4_addr_str, &addr->sin_addr);
 	if (ioctl(sockfd, SIOCSIFADDR, (void *)ifr) == -1)
-		goto out_failure;
+		goto failed;
 
 	inet_pton(AF_INET, ipv4_subnet_str, &addr->sin_addr);
 	if (ioctl(sockfd, SIOCSIFNETMASK, ifr) == -1)
-		goto out_failure;
+		goto failed;
 
 	ifr->ifr_flags |= (IFF_UP | IFF_RUNNING);
 	if (ioctl(sockfd, SIOCSIFFLAGS, ifr) == -1)
-		goto out_failure;
+		goto failed;
 
 	goto out;
-out_failure:
+failed:
 	perror("tun_set_ip");
 	ret = -1;
 out:
 	if (sockfd != -1)
 		close(sockfd);
+
 	free(ipv4_addr_str);
 	free(ipv4_subnet_str);
+
 	return ret;
+}
+
+void tun_close(int fd)
+{
+	if (fd > 0)
+		close(fd);
 }

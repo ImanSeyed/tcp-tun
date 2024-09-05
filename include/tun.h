@@ -4,6 +4,8 @@
 #include <linux/if.h>
 #include "ipv4_addr.h"
 
+#define TUN_MTU 1500
+
 /*
  * 2 bytes for ether_flags and 2 bytes for ether_type
  * according to tuntap.txt in section 3.2 "Frame format"
@@ -16,3 +18,4 @@
 int tun_open(char *devname, struct ifreq *ifr);
 int tun_set_ip(int nic_fd, struct ifreq *ifr, union ipv4_addr *ip_addr,
 	       union ipv4_addr *subnet);
+void tun_close(int fd);
