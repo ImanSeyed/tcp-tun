@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "ipv4_header.h"
 #include "tcp_header.h"
+#include "packet.h"
 #include "types.h"
 
 #define ENUMERATE_STATES()              \
@@ -68,7 +69,5 @@ struct TCB {
 	struct recv_sequence_space recv;
 };
 
-struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
-			   struct tcp_header *tcph);
-void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	       struct TCB *ctrl_block, u8 *data);
+struct TCB *accept_request(int nic_fd, struct packet *recv_pkt);
+void on_packet(int nic_fd, struct packet *recvd_pkt, struct TCB *ctrl_block);

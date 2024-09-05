@@ -1,13 +1,9 @@
 #pragma once
 
-#include "types.h"
 #include "states.h"
-#include "tcp_header.h"
-#include "ipv4_header.h"
+#include "packet.h"
 
-void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-		 u8 *buffer, struct TCB *ctrl_block);
-void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	      struct TCB *ctrl_block);
-void send_fin_ack(int nic_fd, struct ipv4_header *ipv4h,
-		  struct tcp_header *tcph, struct TCB *ctrl_block);
+void send_packet(int nic_fd, struct packet *pkt, struct TCB *ctrl_block);
+void send_rst(int nic_fd, struct packet *recvd_pkt, struct TCB *ctrl_block);
+void shutdown_connection(int nic_fd, struct packet *recvd_pkt,
+			 struct TCB *ctrl_block);

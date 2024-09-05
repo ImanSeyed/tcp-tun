@@ -26,12 +26,17 @@ static bool is_between_wrapped(u32 start, u32 x, u32 end)
 	return wrapping_lt(start, x) && wrapping_lt(x, end);
 }
 
-struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
-			   struct tcp_header *tcph)
+struct TCB *accept_request(int nic_fd, struct packet *recvd_pkt)
 {
-	struct tcp_header syn_ack;
-	struct ipv4_header ip;
-	struct TCB *ctrl_block = malloc(sizeof(struct TCB));
+	struct packet *syn_ack;
+	struct ipv4_header *recvd_ipv4h;
+	struct tcp_header *recvd_tcph;
+	struct TCB *ctrl_block;
+
+	syn_ack = alloc_packet();
+	recvd_ipv4h = recvd_pkt->ipv4h;
+	recvd_tcph = recvd_pkt->tcph;
+	ctrl_block = malloc(sizeof(struct TCB));
 
 	*ctrl_block = (struct TCB){
 		.state = SYNRECVD,
@@ -45,30 +50,35 @@ struct TCB *accept_request(int nic_fd, struct ipv4_header *ipv4h,
 			.wl2 = 0,
 		},
 		.recv = {
-			.irs = tcph->seq_number,
-			.nxt = tcph->seq_number + 1,
-			.wnd = tcph->win_size,
+			.irs = recvd_tcph->seq_number,
+			.nxt = recvd_tcph->seq_number + 1,
+			.wnd = recvd_tcph->win_size,
 			.up = false,
 		},
 	};
 
 	ctrl_block->send.nxt = ctrl_block->send.iss + 1;
 
-	init_tcph(&syn_ack, tcph->dest_port, tcph->src_port, SYN | ACK,
-		  ctrl_block->send.iss, tcph->seq_number + 1,
+	init_tcph(syn_ack->tcph, recvd_tcph->dest_port, recvd_tcph->src_port,
+		  SYN | ACK, ctrl_block->send.iss, recvd_tcph->seq_number + 1,
 		  ctrl_block->send.wnd);
-	init_ipv4h(&ip, 20 + tcph_size(&syn_ack), 64, TCP_PROTO,
-		   ipv4h->dest_addr, ipv4h->src_addr);
-	send_packet(nic_fd, &ip, &syn_ack, NULL, ctrl_block);
+	init_ipv4h(syn_ack->ipv4h, 20 + tcph_size(syn_ack->tcph), TCP_PROTO,
+		   recvd_ipv4h->dest_addr, recvd_ipv4h->src_addr);
+	send_packet(nic_fd, syn_ack, ctrl_block);
 
 	return ctrl_block;
 }
 
-void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	       struct TCB *ctrl_block, u8 *data)
+void on_packet(int nic_fd, struct packet *recvd_pkt, struct TCB *ctrl_block)
 {
-	u16 data_len = data_size(ipv4h, tcph);
-	u16 flags = tcph_flags(tcph);
+	struct tcp_header *tcph;
+	struct ipv4_header *ipv4h;
+	u16 data_len, flags;
+
+	tcph = recvd_pkt->tcph;
+	ipv4h = recvd_pkt->ipv4h;
+	data_len = data_size(ipv4h, tcph);
+	flags = tcph_flags(tcph);
 
 	if (flags & FIN)
 		++data_len;
@@ -130,7 +140,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 		ctrl_block->send.una = tcph->ack_number;
 
 		/* terminate the connection immediately */
-		send_fin_ack(nic_fd, ipv4h, tcph, ctrl_block);
+		shutdown_connection(nic_fd, recvd_pkt, ctrl_block);
 		ctrl_block->state = FINWAIT1;
 		break;
 	case FINWAIT1:
@@ -138,7 +148,7 @@ void on_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
 			/* UNIMPLEMENTED */
 			break;
 		}
-		send_rst(nic_fd, ipv4h, tcph, ctrl_block);
+		send_rst(nic_fd, recvd_pkt, ctrl_block);
 		/* 
                  * must send ACKed our FIN, since we detected at least one ACKed
 		 * byte, and we have only sent one byte (the FIN)

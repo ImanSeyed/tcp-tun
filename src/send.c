@@ -1,79 +1,62 @@
 #include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
+#include "packet.h"
 #include "ipv4_header.h"
 #include "tcp_header.h"
 #include "types.h"
 #include "states.h"
 #include "send.h"
-#include "tun.h"
 
-void send_packet(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-		 u8 *payload, struct TCB *ctrl_block)
+void send_packet(int nic_fd, struct packet *pkt, struct TCB *ctrl_block)
 {
-	u8 buffer[1504] = { 0 };
-	u8 *pseudo_header = NULL, *ipv4h_ptr = NULL, *tcph_ptr = NULL;
-	size_t ipv4h_len = ipv4h_size(ipv4h);
-	size_t tcph_len = tcph_size(tcph);
-	size_t buffer_len = PI_LEN + ipv4h_len + tcph_len;
-	u8 *packet;
 	u16 flags;
 
-	buffer[ETH_TYPE_OFF] = IPV4_PROTO;
-	packet = &buffer[PI_LEN];
-
-	ipv4h_to_buff(ipv4h, packet, 0);
-	tcph_to_buff(tcph, packet, ipv4h_len);
-	ipv4h_ptr = packet;
-	tcph_ptr = packet + ipv4h_len;
-
-	flags = tcph_flags(tcph);
-
-	/* FIXME: this doesn't seem right at all? */
-	//	if (flags & SYN)
-	//		ctrl_block->send.nxt++;
+	commit_packet(pkt);
+	flags = tcph_flags(pkt->tcph);
 
 	if (flags & FIN)
 		ctrl_block->send.nxt++;
 
-	/* calculate checksums */
-	pseudo_header = get_pseudo_header(ipv4h);
-	ipv4h->checksum = ipv4h_checksum(ipv4h_ptr, ipv4h_len);
-	tcph->checksum = tcph_checksum(tcph_ptr, tcph_len, pseudo_header);
-	memcpy(&ipv4h_ptr[IP_CHECKSUM_OFF], &ipv4h->checksum, sizeof(u16));
-	memcpy(&tcph_ptr[TCP_CHECKSUM_OFF], &tcph->checksum, sizeof(u16));
-
 	/* write the packet info + the packet over the tunnel device */
-	if (write(nic_fd, buffer, buffer_len) == -1)
+	if (write(nic_fd, pkt->buff, pkt_size(pkt)) == -1)
 		perror("write over tun");
 
-	free(pseudo_header);
+	// TODO: implement a queue to store sent *pkt*s for retransmission
+	dealloc_packet(pkt);
 }
 
-void send_rst(int nic_fd, struct ipv4_header *ipv4h, struct tcp_header *tcph,
-	      struct TCB *ctrl_block)
+void send_rst(int nic_fd, struct packet *recvd_pkt, struct TCB *ctrl_block)
 {
-	struct ipv4_header rst_ipv4h;
-	struct tcp_header rst_tcph;
+	struct packet *pkt = alloc_packet();
+	struct tcp_header *recvd_tcph;
+	struct ipv4_header *recvd_ipv4h;
 
-	init_tcph(&rst_tcph, tcph->dest_port, tcph->src_port, RST,
+	recvd_tcph = recvd_pkt->tcph;
+	recvd_ipv4h = recvd_pkt->ipv4h;
+
+	init_tcph(pkt->tcph, recvd_tcph->dest_port, recvd_tcph->src_port, RST,
 		  ctrl_block->send.nxt, 0, ctrl_block->send.wnd);
-	init_ipv4h(&rst_ipv4h, 20 + tcph_size(&rst_tcph), 64, TCP_PROTO,
-		   ipv4h->dest_addr, ipv4h->src_addr);
-	send_packet(nic_fd, &rst_ipv4h, &rst_tcph, NULL, ctrl_block);
+	init_ipv4h(pkt->ipv4h, 20 + tcph_size(pkt->tcph), TCP_PROTO,
+		   recvd_ipv4h->dest_addr, recvd_ipv4h->src_addr);
+
+	send_packet(nic_fd, pkt, ctrl_block);
 }
 
-void send_fin_ack(int nic_fd, struct ipv4_header *ipv4h,
-		  struct tcp_header *tcph, struct TCB *ctrl_block)
+void shutdown_connection(int nic_fd, struct packet *recvd_pkt,
+			 struct TCB *ctrl_block)
 {
-	struct ipv4_header fin_ipv4h;
-	struct tcp_header fin_tcph;
+	struct packet *pkt = alloc_packet();
+	struct tcp_header *recvd_tcph;
+	struct ipv4_header *recvd_ipv4h;
 
-	init_tcph(&fin_tcph, tcph->dest_port, tcph->src_port, FIN | ACK,
-		  ctrl_block->send.nxt, ctrl_block->recv.nxt,
+	recvd_tcph = recvd_pkt->tcph;
+	recvd_ipv4h = recvd_pkt->ipv4h;
+
+	init_tcph(pkt->tcph, recvd_tcph->dest_port, recvd_tcph->src_port,
+		  FIN | ACK, ctrl_block->send.nxt, ctrl_block->recv.nxt,
 		  ctrl_block->send.wnd);
-	init_ipv4h(&fin_ipv4h, 20 + tcph_size(&fin_tcph), 64, TCP_PROTO,
-		   ipv4h->dest_addr, ipv4h->src_addr);
-	send_packet(nic_fd, &fin_ipv4h, &fin_tcph, NULL, ctrl_block);
+	init_ipv4h(pkt->ipv4h, 20 + tcph_size(pkt->tcph), TCP_PROTO,
+		   recvd_ipv4h->dest_addr, recvd_ipv4h->src_addr);
+
+	send_packet(nic_fd, pkt, ctrl_block);
 }

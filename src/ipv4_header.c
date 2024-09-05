@@ -27,9 +27,8 @@ void ipv4h_from_buff(struct ipv4_header *ipv4h, const u8 *buffer, size_t start)
 	assert(ipv4h_size(ipv4h) >= 20);
 }
 
-void init_ipv4h(struct ipv4_header *ipv4h, u16 total_length, u8 time_to_live,
-		u8 protocol, union ipv4_addr src_addr,
-		union ipv4_addr dest_addr)
+void init_ipv4h(struct ipv4_header *ipv4h, u16 total_length, u8 protocol,
+		union ipv4_addr src_addr, union ipv4_addr dest_addr)
 {
 	ipv4h->version_and_ihl.version = 0x4;
 	ipv4h->version_and_ihl.ihl = IHL_MINIMUM_SIZE;
@@ -37,7 +36,7 @@ void init_ipv4h(struct ipv4_header *ipv4h, u16 total_length, u8 time_to_live,
 	ipv4h->total_length = total_length;
 	ipv4h->identification = 0;
 	ipv4h->flags_and_fragment.flags = 0x2; /* Don't fragment */
-	ipv4h->ttl = time_to_live;
+	ipv4h->ttl = 64;
 	ipv4h->protocol = protocol;
 	ipv4h->checksum = 0;
 	ipv4h->src_addr = src_addr;
