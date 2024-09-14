@@ -24,8 +24,8 @@ void tcph_from_buff(struct tcp_header *tcph, const u8 *buffer, size_t start)
 	assert(tcph_size(tcph) >= 20);
 }
 
-void init_tcph(struct tcp_header *tcph, u16 src_port, u16 dest_port, u16 flags,
-	       u32 seq_number, u32 ack_number, u16 win_size)
+void set_tcph(struct tcp_header *tcph, u16 src_port, u16 dest_port, u16 flags,
+	      u32 seq_number, u32 ack_number, u16 win_size)
 {
 	tcph->src_port = src_port;
 	tcph->dest_port = dest_port;

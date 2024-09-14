@@ -59,11 +59,11 @@ struct TCB *accept_request(int nic_fd, struct packet *recvd_pkt)
 
 	ctrl_block->send.nxt = ctrl_block->send.iss + 1;
 
-	init_tcph(syn_ack->tcph, recvd_tcph->dest_port, recvd_tcph->src_port,
-		  SYN | ACK, ctrl_block->send.iss, recvd_tcph->seq_number + 1,
-		  ctrl_block->send.wnd);
-	init_ipv4h(syn_ack->ipv4h, 20 + tcph_size(syn_ack->tcph), TCP_PROTO,
-		   recvd_ipv4h->dest_addr, recvd_ipv4h->src_addr);
+	set_tcph(syn_ack->tcph, recvd_tcph->dest_port, recvd_tcph->src_port,
+		 SYN | ACK, ctrl_block->send.iss, recvd_tcph->seq_number + 1,
+		 ctrl_block->send.wnd);
+	set_ipv4h(syn_ack->ipv4h, 20 + tcph_size(syn_ack->tcph), TCP_PROTO,
+		  recvd_ipv4h->dest_addr, recvd_ipv4h->src_addr);
 	send_packet(nic_fd, syn_ack, ctrl_block);
 
 	return ctrl_block;

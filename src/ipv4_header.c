@@ -27,8 +27,8 @@ void ipv4h_from_buff(struct ipv4_header *ipv4h, const u8 *buffer, size_t start)
 	assert(ipv4h_size(ipv4h) >= 20);
 }
 
-void init_ipv4h(struct ipv4_header *ipv4h, u16 total_length, u8 protocol,
-		union ipv4_addr src_addr, union ipv4_addr dest_addr)
+void set_ipv4h(struct ipv4_header *ipv4h, u16 total_length, u8 protocol,
+	       union ipv4_addr src_addr, union ipv4_addr dest_addr)
 {
 	ipv4h->version_and_ihl.version = 0x4;
 	ipv4h->version_and_ihl.ihl = IHL_MINIMUM_SIZE;

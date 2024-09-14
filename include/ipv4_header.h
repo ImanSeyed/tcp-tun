@@ -62,7 +62,7 @@ static inline u16 ipv4h_fragments(const struct ipv4_header *ipv4h)
 }
 
 void ipv4h_from_buff(struct ipv4_header *ipv4h, const u8 *buffer, size_t start);
-void init_ipv4h(struct ipv4_header *ipv4h, u16 total_length, u8 protocol,
+void set_ipv4h(struct ipv4_header *ipv4h, u16 total_length, u8 protocol,
 		union ipv4_addr src_addr, union ipv4_addr dest_addr);
 void ipv4h_to_buff(const struct ipv4_header *ipv4h, u8 *buffer, size_t start);
 u16 ipv4h_checksum(const u8 *ipv4_ptr, size_t len);
