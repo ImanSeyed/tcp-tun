@@ -12,14 +12,14 @@ union ipv4_addr {
 	u32 byte_value;
 };
 
-struct addrress_pair {
+struct endpoint {
 	union ipv4_addr ip;
 	u16 port;
 };
 
 struct conn_quad {
-	struct addrress_pair src;
-	struct addrress_pair dest;
+	struct endpoint src;
+	struct endpoint dest;
 };
 
 void init_ipv4_addr(union ipv4_addr *addr, u8 a, u8 b, u8 c, u8 d);
