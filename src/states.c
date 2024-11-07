@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 #include <assert.h>
 #include "ipv4_header.h"
 #include "tcp_header.h"
@@ -26,6 +27,12 @@ static bool is_between_wrapped(u32 start, u32 x, u32 end)
 	return wrapping_lt(start, x) && wrapping_lt(x, end);
 }
 
+static u32 get_isn(void)
+{
+	srand(time(NULL));
+	return (u32)rand();
+}
+
 struct TCB *accept_request(int nic_fd, struct packet *recvd_pkt)
 {
 	struct packet *syn_ack;
@@ -41,7 +48,7 @@ struct TCB *accept_request(int nic_fd, struct packet *recvd_pkt)
 	*ctrl_block = (struct TCB){
 		.state = SYNRECVD,
 		.send = {
-			.iss = 0,
+			.iss = get_isn(),
 			.una = 0,
 			.nxt = 0,
 			.wnd = 10,
