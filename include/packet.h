@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tun.h"
+#include "list.h"
 #include <ipv4_header.h>
 #include <tcp_header.h>
 
@@ -12,6 +13,8 @@ struct packet {
 	u8 *tcph_buff;
 	u8 *ipv4h_buff;
 	u8 *data;
+	u64 timestamp; // TODO: implement retransmission (timeout)
+	struct list_head list; // TODO: implement retransmission (queue)
 };
 
 static inline size_t pkt_size(struct packet *pkt)
