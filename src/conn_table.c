@@ -6,43 +6,69 @@
 #include "states.h"
 #include "conn_table.h"
 
-#define TABLE_SIZE 20000
+#define DEFAULT_TABLE_SIZE 20
+#define DEFAULT_LOAD_FACTOR 0.75
+#define FNV1A_OFFSET_BASIS 2166136261U
+#define FNV1A_PRIME 16777619U
 
-u32 xorshift32(u32 x)
+static size_t hash_func_sized(const struct conn_quad *quad, size_t table_size)
 {
-	x ^= ~(x << 15);
-	x += (x >> 10);
-	x ^= (x << 3);
-	x += ~(x >> 16);
+	const uint8_t *data = (const uint8_t *)quad;
+	size_t hash = FNV1A_OFFSET_BASIS;
 
-	return x;
+	for (size_t i = 0; i < sizeof(struct conn_quad); i++) {
+		hash ^= data[i];
+		hash *= FNV1A_PRIME;
+	}
+
+	return hash % table_size;
 }
 
-u32 pair_hash(u32 x, u32 y)
+static bool conn_table_resize(struct conn_table *table)
 {
-	return xorshift32((x << 3) ^ (y >> 2) ^ (x >> 3) ^ (y << 4));
-}
+	size_t old_size = table->size;
+	size_t new_size = old_size * 2;
+	struct list_head *old_buckets = table->buckets;
+	struct list_head *new_buckets;
+	struct conn_table_entry *entry, *tmp;
+	u32 new_slot;
 
-u32 hash_func(const struct conn_quad *quad)
-{
-	u32 f0 = quad->src.ip.byte_value;
-	u32 f1 = quad->dest.ip.byte_value;
-	u16 ports[] = { quad->src.port, quad->dest.port };
-	u32 f2;
-	memcpy(&f2, ports, sizeof(u32));
+	new_buckets = malloc(new_size * sizeof(struct list_head));
+	if (!new_buckets)
+		return false;
 
-	return pair_hash(pair_hash(f0, f1), f2) % TABLE_SIZE;
+	for (size_t i = 0; i < new_size; i++)
+		list_head_init(&new_buckets[i]);
+
+	table->buckets = new_buckets;
+	table->size = new_size;
+
+	/* rehash all existing entries */
+	for (size_t i = 0; i < old_size; i++) {
+		list_for_each_entry_safe(entry, tmp, &old_buckets[i], list)
+		{
+			list_del(&entry->list);
+
+			new_slot = hash_func_sized(&entry->quad, new_size);
+			list_add(&entry->list, &new_buckets[new_slot]);
+		}
+	}
+
+	free(old_buckets);
+	return true;
 }
 
 struct conn_table_entry *init_conn_table_entry(struct conn_quad *key,
 					       struct TCB *value)
 {
 	struct conn_table_entry *entry;
-
 	entry = malloc(sizeof(struct conn_table_entry));
+
+	if (!entry)
+		return NULL;
 	entry->quad = *key;
 	entry->ctrl_block = value;
-	entry->next = NULL;
+	list_head_init(&entry->list);
 
 	return entry;
 }
@@ -52,7 +78,21 @@ struct conn_table *init_conn_table(void)
 	struct conn_table *table;
 
 	table = malloc(sizeof(struct conn_table));
-	table->entries = calloc(TABLE_SIZE, sizeof(struct conn_table_entry *));
+	if (!table)
+		return NULL;
+
+	table->buckets = malloc(DEFAULT_TABLE_SIZE * sizeof(struct list_head));
+	if (!table->buckets) {
+		free(table);
+		return NULL;
+	}
+
+	for (size_t i = 0; i < DEFAULT_TABLE_SIZE; i++) {
+		list_head_init(&table->buckets[i]);
+	}
+
+	table->size = DEFAULT_TABLE_SIZE;
+	table->count = 0;
 
 	return table;
 }
@@ -60,78 +100,61 @@ struct conn_table *init_conn_table(void)
 void conn_table_insert(struct conn_table *table, struct conn_quad *key,
 		       struct TCB *value)
 {
-	u32 slot = hash_func(key);
 	struct conn_table_entry *entry;
-	struct conn_table_entry *prev;
+	size_t slot;
 
-	entry = table->entries[slot];
-	if (entry == NULL) {
-		table->entries[slot] = init_conn_table_entry(key, value);
-		return;
+	if ((double)table->count / table->size > DEFAULT_LOAD_FACTOR) {
+		if (!conn_table_resize(table))
+			fprintf(stderr,
+				"Warning: Failed to resize hash table\n");
 	}
 
-	while (entry != NULL) {
+	slot = hash_func_sized(key, table->size);
+
+	list_for_each_entry(entry, &table->buckets[slot], list)
+	{
 		if (memcmp(&entry->quad, key, sizeof(struct conn_quad)) == 0) {
 			entry->ctrl_block = value;
 			return;
 		}
-		prev = entry;
-		entry = prev->next;
 	}
 
-	prev->next = init_conn_table_entry(key, value);
+	entry = init_conn_table_entry(key, value);
+	if (!entry)
+		return;
+
+	list_add(&entry->list, &table->buckets[slot]);
+	table->count++;
 }
 
 struct TCB *conn_table_get(const struct conn_table *table,
 			   const struct conn_quad *key)
 {
-	u32 slot = hash_func(key);
+	size_t slot = hash_func_sized(key, table->size);
 	struct conn_table_entry *entry;
 
-	entry = table->entries[slot];
-	while (entry != NULL) {
+	list_for_each_entry(entry, &table->buckets[slot], list)
+	{
 		if (memcmp(&entry->quad, key, sizeof(struct conn_quad)) == 0)
 			return entry->ctrl_block;
-		entry = entry->next;
 	}
-
 	return NULL;
 }
 
 void conn_table_remove(struct conn_table *table, struct conn_quad *key)
 {
-	u32 slot = hash_func(key);
-	struct conn_table_entry *entry;
-	struct conn_table_entry *prev;
-	size_t index = 0;
+	size_t slot = hash_func_sized(key, table->size);
+	struct conn_table_entry *entry, *tmp;
 
-	entry = table->entries[slot];
-	if (entry == NULL)
-		return;
-
-	free(entry->ctrl_block);
-	while (entry != NULL) {
+	list_for_each_entry_safe(entry, tmp, &table->buckets[slot], list)
+	{
 		if (memcmp(&entry->quad, key, sizeof(struct conn_quad)) == 0) {
-			/* first item and no next entry */
-			if (entry->next == NULL && index == 0)
-				table->entries[slot] = NULL;
-			/* first item with a next entry */
-			else if (entry->next != NULL && index == 0)
-				table->entries[slot] = entry->next;
-			/* last item */
-			else if (entry->next == NULL && index != 0)
-				prev->next = NULL;
-			/* middle item */
-			else if (entry->next != NULL && index != 0)
-				prev->next = entry->next;
-
+			list_del(&entry->list);
+			free(entry->ctrl_block);
 			free(entry);
+			table->count--;
 			return;
 		}
-
-		prev = entry;
-		entry = prev->next;
-		++index;
 	}
 }
 
@@ -139,19 +162,18 @@ void conn_table_dump(const struct conn_table *table)
 {
 	struct conn_table_entry *entry;
 
-	for (int i = 0; i < TABLE_SIZE; ++i) {
-		entry = table->entries[i];
-		if (entry == NULL)
+	for (size_t i = 0; i < table->size; i++) {
+		if (list_empty(&table->buckets[i]))
 			continue;
 
-		printf("slot[%u]: ", i);
-		do {
+		printf("slot[%zu]: ", i);
+		list_for_each_entry(entry, &table->buckets[i], list)
+		{
 			pr_quad(entry->quad);
 			printf(" => ");
 			pr_state(entry->ctrl_block->state);
 			printf(" ");
-			entry = entry->next;
-		} while (entry != NULL);
+		}
 		printf("\n");
 		fflush(stdout);
 	}

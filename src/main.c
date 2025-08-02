@@ -59,10 +59,16 @@ int main()
 		} else {
 			struct TCB *new_ctrl_block =
 				accept_request(nic_fd, recvd_pkt);
-			conn_table_insert(conn_tbl, &current_quad,
-					  new_ctrl_block);
-			conn_table_dump(conn_tbl);
-			printf("==============================\n");
+			if (new_ctrl_block) {
+				conn_table_insert(conn_tbl, &current_quad,
+						  new_ctrl_block);
+
+				printf("New connection added. Table stats: size=%zu, count=%zu\n",
+				       conn_tbl->size, conn_tbl->count);
+
+				conn_table_dump(conn_tbl);
+				printf("==============================\n");
+			}
 		}
 	}
 }
