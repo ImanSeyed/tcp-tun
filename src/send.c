@@ -7,6 +7,33 @@
 #include "states.h"
 #include "send.h"
 
+static struct packet *create_response_packet(const struct packet *recvd_pkt,
+					     struct tcb *ctrl_block, u16 flags,
+					     u32 ack_num)
+{
+	struct packet *pkt;
+	struct ipv4_header *recvd_ipv4h;
+	struct tcp_header *recvd_tcph;
+
+	pkt = alloc_packet();
+	if (!pkt) {
+		perror("create_response_packet");
+		return NULL;
+	}
+
+	recvd_ipv4h = recvd_pkt->ipv4h;
+	recvd_tcph = recvd_pkt->tcph;
+
+	/* swap src/dest for response */
+	set_tcph(pkt->tcph, recvd_tcph->dest_port, recvd_tcph->src_port, flags,
+		 ctrl_block->send.nxt, ack_num, ctrl_block->send.wnd);
+
+	set_ipv4h(pkt->ipv4h, 20 + tcph_size(pkt->tcph), TCP_PROTO,
+		  recvd_ipv4h->dest_addr, recvd_ipv4h->src_addr);
+
+	return pkt;
+}
+
 void send_packet(int nic_fd, struct packet *pkt, struct tcb *ctrl_block)
 {
 	u16 flags;
@@ -25,38 +52,27 @@ void send_packet(int nic_fd, struct packet *pkt, struct tcb *ctrl_block)
 	dealloc_packet(pkt);
 }
 
-void send_rst(int nic_fd, struct packet *recvd_pkt, struct tcb *ctrl_block)
+void send_rst(int nic_fd, const struct packet *recvd_pkt,
+	      struct tcb *ctrl_block)
 {
-	struct packet *pkt = alloc_packet();
-	struct tcp_header *recvd_tcph;
-	struct ipv4_header *recvd_ipv4h;
+	struct packet *pkt;
 
-	recvd_tcph = recvd_pkt->tcph;
-	recvd_ipv4h = recvd_pkt->ipv4h;
-
-	set_tcph(pkt->tcph, recvd_tcph->dest_port, recvd_tcph->src_port, RST,
-		 ctrl_block->send.nxt, 0, ctrl_block->send.wnd);
-	set_ipv4h(pkt->ipv4h, 20 + tcph_size(pkt->tcph), TCP_PROTO,
-		  recvd_ipv4h->dest_addr, recvd_ipv4h->src_addr);
+	pkt = create_response_packet(recvd_pkt, ctrl_block, RST, 0);
+	if (!pkt)
+		return;
 
 	send_packet(nic_fd, pkt, ctrl_block);
 }
 
-void shutdown_connection(int nic_fd, struct packet *recvd_pkt,
+void shutdown_connection(int nic_fd, const struct packet *recvd_pkt,
 			 struct tcb *ctrl_block)
 {
-	struct packet *pkt = alloc_packet();
-	struct tcp_header *recvd_tcph;
-	struct ipv4_header *recvd_ipv4h;
+	struct packet *pkt;
 
-	recvd_tcph = recvd_pkt->tcph;
-	recvd_ipv4h = recvd_pkt->ipv4h;
-
-	set_tcph(pkt->tcph, recvd_tcph->dest_port, recvd_tcph->src_port,
-		 FIN | ACK, ctrl_block->send.nxt, ctrl_block->recv.nxt,
-		 ctrl_block->send.wnd);
-	set_ipv4h(pkt->ipv4h, 20 + tcph_size(pkt->tcph), TCP_PROTO,
-		  recvd_ipv4h->dest_addr, recvd_ipv4h->src_addr);
+	pkt = create_response_packet(recvd_pkt, ctrl_block, FIN | ACK,
+				     ctrl_block->recv.nxt);
+	if (!pkt)
+		return;
 
 	send_packet(nic_fd, pkt, ctrl_block);
 }
