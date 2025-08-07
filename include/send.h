@@ -4,6 +4,7 @@
 #include "packet.h"
 
 void send_packet(int nic_fd, struct packet *pkt, struct tcb *ctrl_block);
-void send_rst(int nic_fd, struct packet *recvd_pkt, struct tcb *ctrl_block);
-void shutdown_connection(int nic_fd, struct packet *recvd_pkt,
+void send_rst(int nic_fd, const struct packet *recvd_pkt,
+	      struct tcb *ctrl_block);
+void shutdown_connection(int nic_fd, const struct packet *recvd_pkt,
 			 struct tcb *ctrl_block);
