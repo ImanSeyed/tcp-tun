@@ -52,10 +52,9 @@ void tcph_to_buff(const struct tcp_header *tcph, u8 *buffer, size_t start)
 	store_swapped_endian16(tcph->urg_pointer, &header_ptr[URG_PTR_OFF]);
 }
 
-u8 *get_pseudo_header(const struct ipv4_header *ipv4h)
+void get_pseudo_header(const struct ipv4_header *ipv4h, u8 *pseudo_header)
 {
 	u16 segment_len = ipv4h->total_length - ipv4h_size(ipv4h);
-	u8 *pseudo_header = (u8 *)calloc(PSEUDO_HEADER_SIZE, sizeof(u8));
 
 	store_swapped_endian32(ipv4h->src_addr.byte_value,
 			       &pseudo_header[P_SRC_ADDR_OFF]);
@@ -63,8 +62,6 @@ u8 *get_pseudo_header(const struct ipv4_header *ipv4h)
 			       &pseudo_header[P_DST_ADDR_OFF]);
 	pseudo_header[P_PROTO_OFF] = ipv4h->protocol;
 	store_swapped_endian16(segment_len, &pseudo_header[P_SEG_LEN_OFF]);
-
-	return pseudo_header;
 }
 
 u16 tcph_checksum(const u8 *tcph_buff, size_t len, const u8 *pseudo_header)
