@@ -40,15 +40,15 @@ int tun_set_ip(int nic_fd, struct ifreq *ifr, union ipv4_addr *ip_addr,
 	int ret;
 	int sockfd;
 	struct sockaddr_in *addr;
-	char *ipv4_addr_str;
-	char *ipv4_subnet_str;
+	char ipv4_addr_str[IPV4_ADDR_STR_LEN];
+	char ipv4_subnet_str[IPV4_ADDR_STR_LEN];
 
 	ret = 0;
 	sockfd = -1;
 	addr = (struct sockaddr_in *)&ifr->ifr_addr;
 	ifr->ifr_addr.sa_family = AF_INET;
-	ipv4_addr_str = ipv4_addr_to_str(ip_addr);
-	ipv4_subnet_str = ipv4_addr_to_str(subnet);
+	ipv4_addr_to_str(ip_addr, ipv4_addr_str);
+	ipv4_addr_to_str(subnet, ipv4_subnet_str);
 
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 		goto failed;
@@ -72,9 +72,6 @@ failed:
 out:
 	if (sockfd != -1)
 		close(sockfd);
-
-	free(ipv4_addr_str);
-	free(ipv4_subnet_str);
 
 	return ret;
 }

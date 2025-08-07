@@ -9,9 +9,10 @@
 
 void pr_ipv4(union ipv4_addr ip)
 {
-	char *ipv4_addr_str = ipv4_addr_to_str(&ip);
+	char ipv4_addr_str[IPV4_ADDR_STR_LEN];
+
+	ipv4_addr_to_str(&ip, ipv4_addr_str);
 	printf("%s", ipv4_addr_str);
-	free(ipv4_addr_str);
 }
 
 void pr_addr(union ipv4_addr ip, u16 port)
