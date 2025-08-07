@@ -8,7 +8,7 @@
 
 struct conn_table_entry {
 	struct conn_quad quad;
-	struct TCB *ctrl_block;
+	struct tcb *ctrl_block;
 	struct list_head list;
 };
 
@@ -20,10 +20,10 @@ struct conn_table {
 
 struct conn_table *init_conn_table(void);
 struct conn_table_entry *init_conn_table_entry(struct conn_quad *key,
-					       struct TCB *value);
+					       struct tcb *value);
 void conn_table_insert(struct conn_table *hashmap, struct conn_quad *key,
-		       struct TCB *value);
-struct TCB *conn_table_get(const struct conn_table *hashmap,
+		       struct tcb *value);
+struct tcb *conn_table_get(const struct conn_table *hashmap,
 			   const struct conn_quad *key);
 void conn_table_remove(struct conn_table *hashmap, struct conn_quad *key);
 void conn_table_dump(const struct conn_table *table);

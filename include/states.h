@@ -63,11 +63,11 @@ struct recv_sequence_space {
 	u32 irs; /* initial receive sequence number */
 };
 
-struct TCB {
+struct tcb {
 	enum tcp_state state;
 	struct send_sequence_space send;
 	struct recv_sequence_space recv;
 };
 
-struct TCB *accept_request(int nic_fd, struct packet *recv_pkt);
-void on_packet(int nic_fd, struct packet *recvd_pkt, struct TCB *ctrl_block);
+struct tcb *accept_request(int nic_fd, struct packet *recv_pkt);
+void on_packet(int nic_fd, struct packet *recvd_pkt, struct tcb *ctrl_block);
