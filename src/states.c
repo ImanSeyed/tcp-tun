@@ -33,19 +33,19 @@ static u32 get_isn(void)
 	return (u32)rand();
 }
 
-struct TCB *accept_request(int nic_fd, struct packet *recvd_pkt)
+struct tcb *accept_request(int nic_fd, struct packet *recvd_pkt)
 {
 	struct packet *syn_ack;
 	struct ipv4_header *recvd_ipv4h;
 	struct tcp_header *recvd_tcph;
-	struct TCB *ctrl_block;
+	struct tcb *ctrl_block;
 
 	syn_ack = alloc_packet();
 	recvd_ipv4h = recvd_pkt->ipv4h;
 	recvd_tcph = recvd_pkt->tcph;
-	ctrl_block = malloc(sizeof(struct TCB));
+	ctrl_block = malloc(sizeof(struct tcb));
 
-	*ctrl_block = (struct TCB){
+	*ctrl_block = (struct tcb){
 		.state = SYNRECVD,
 		.send = {
 			.iss = get_isn(),
@@ -76,7 +76,7 @@ struct TCB *accept_request(int nic_fd, struct packet *recvd_pkt)
 	return ctrl_block;
 }
 
-void on_packet(int nic_fd, struct packet *recvd_pkt, struct TCB *ctrl_block)
+void on_packet(int nic_fd, struct packet *recvd_pkt, struct tcb *ctrl_block)
 {
 	struct tcp_header *tcph;
 	struct ipv4_header *ipv4h;

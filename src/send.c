@@ -7,7 +7,7 @@
 #include "states.h"
 #include "send.h"
 
-void send_packet(int nic_fd, struct packet *pkt, struct TCB *ctrl_block)
+void send_packet(int nic_fd, struct packet *pkt, struct tcb *ctrl_block)
 {
 	u16 flags;
 
@@ -25,7 +25,7 @@ void send_packet(int nic_fd, struct packet *pkt, struct TCB *ctrl_block)
 	dealloc_packet(pkt);
 }
 
-void send_rst(int nic_fd, struct packet *recvd_pkt, struct TCB *ctrl_block)
+void send_rst(int nic_fd, struct packet *recvd_pkt, struct tcb *ctrl_block)
 {
 	struct packet *pkt = alloc_packet();
 	struct tcp_header *recvd_tcph;
@@ -43,7 +43,7 @@ void send_rst(int nic_fd, struct packet *recvd_pkt, struct TCB *ctrl_block)
 }
 
 void shutdown_connection(int nic_fd, struct packet *recvd_pkt,
-			 struct TCB *ctrl_block)
+			 struct tcb *ctrl_block)
 {
 	struct packet *pkt = alloc_packet();
 	struct tcp_header *recvd_tcph;

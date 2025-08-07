@@ -53,11 +53,11 @@ int main()
 		};
 
 		if (conn_table_key_exist(conn_tbl, &current_quad)) {
-			struct TCB *ctrl_block =
+			struct tcb *ctrl_block =
 				conn_table_get(conn_tbl, &current_quad);
 			on_packet(nic_fd, recvd_pkt, ctrl_block);
 		} else {
-			struct TCB *new_ctrl_block =
+			struct tcb *new_ctrl_block =
 				accept_request(nic_fd, recvd_pkt);
 			if (new_ctrl_block) {
 				conn_table_insert(conn_tbl, &current_quad,

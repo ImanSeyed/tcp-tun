@@ -59,7 +59,7 @@ static bool conn_table_resize(struct conn_table *table)
 }
 
 struct conn_table_entry *init_conn_table_entry(struct conn_quad *key,
-					       struct TCB *value)
+					       struct tcb *value)
 {
 	struct conn_table_entry *entry;
 	entry = malloc(sizeof(struct conn_table_entry));
@@ -98,7 +98,7 @@ struct conn_table *init_conn_table(void)
 }
 
 void conn_table_insert(struct conn_table *table, struct conn_quad *key,
-		       struct TCB *value)
+		       struct tcb *value)
 {
 	struct conn_table_entry *entry;
 	size_t slot;
@@ -127,7 +127,7 @@ void conn_table_insert(struct conn_table *table, struct conn_quad *key,
 	table->count++;
 }
 
-struct TCB *conn_table_get(const struct conn_table *table,
+struct tcb *conn_table_get(const struct conn_table *table,
 			   const struct conn_quad *key)
 {
 	size_t slot = hash_func_sized(key, table->size);
