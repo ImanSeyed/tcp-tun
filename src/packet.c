@@ -35,14 +35,14 @@ void dealloc_packet(struct packet *pkt)
 
 void commit_packet(struct packet *pkt)
 {
-	u8 *pseudo_header;
+	u8 pseudo_header[PSEUDO_HEADER_SIZE] = { 0 };
 
 	/* commit headers to the buffer */
 	ipv4h_to_buff(pkt->ipv4h, pkt->pkt_buff, 0);
 	tcph_to_buff(pkt->tcph, pkt->pkt_buff, ipv4h_size(pkt->ipv4h));
 
 	/* update checksums */
-	pseudo_header = get_pseudo_header(pkt->ipv4h);
+	get_pseudo_header(pkt->ipv4h, pseudo_header);
 
 	pkt->ipv4h->checksum =
 		ipv4h_checksum(pkt->pkt_buff, ipv4h_size(pkt->ipv4h));
@@ -53,6 +53,4 @@ void commit_packet(struct packet *pkt)
 	       sizeof(u16));
 	memcpy(&pkt->tcph_buff[TCP_CHECKSUM_OFF], &pkt->tcph->checksum,
 	       sizeof(u16));
-
-	free(pseudo_header);
 }
