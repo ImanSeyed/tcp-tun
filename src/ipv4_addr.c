@@ -1,22 +1,14 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "ipv4_addr.h"
 
-char *ipv4_addr_to_str(union ipv4_addr *addr)
+void ipv4_addr_to_str(union ipv4_addr *addr, char ip_str[IPV4_ADDR_STR_LEN])
 {
 	assert(addr != NULL);
+	assert(ip_str != NULL);
 
-	char *ipv4_addr_str = calloc(16, sizeof(char));
-	if (ipv4_addr_str == NULL) {
-		perror("ipv4_addr_to_str");
-		return NULL;
-	}
-
-	sprintf(ipv4_addr_str, "%u.%u.%u.%u", addr->first, addr->second,
-		addr->third, addr->fourth);
-
-	return ipv4_addr_str;
+	snprintf(ip_str, IPV4_ADDR_STR_LEN, "%u.%u.%u.%u", addr->first,
+		 addr->second, addr->third, addr->fourth);
 }
 
 void init_ipv4_addr(union ipv4_addr *addr, u8 a, u8 b, u8 c, u8 d)
